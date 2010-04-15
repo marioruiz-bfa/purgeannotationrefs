@@ -19,21 +19,19 @@ public class FieldAdapter implements FieldVisitor {
 	 * 
 	 * @param fv delegate instance
 	 */
-	public FieldAdapter(FieldVisitor fv) {
+	public FieldAdapter(final FieldVisitor fv) {
 		this.fv = fv;
 	}
 
-	@Override
-	public AnnotationVisitor visitAnnotation(String arg0, boolean arg1) {
-		return this.fv.visitAnnotation(arg0, arg1);
+	public AnnotationVisitor visitAnnotation(final String string,
+			final boolean b) {
+		return this.fv.visitAnnotation(string, b);
 	}
 
-	@Override
-	public void visitAttribute(Attribute arg0) {
-		this.fv.visitAttribute(arg0);
+	public void visitAttribute(final Attribute attribute) {
+		this.fv.visitAttribute(attribute);
 	}
 
-	@Override
 	public void visitEnd() {
 		this.fv.visitEnd();
 	}
