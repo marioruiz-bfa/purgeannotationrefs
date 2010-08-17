@@ -16,7 +16,7 @@ import org.objectweb.asm.MethodVisitor;
  * 
  * @author Peter Fichtner
  */
-public class AnnotationParameterVisitor extends ClassAdapter {
+public class AnnotationParameterVisitor extends ClassAdapter implements FilteringVisitor {
 
 	private final List<String> filtered = new ArrayList<String>();
 
@@ -33,12 +33,10 @@ public class AnnotationParameterVisitor extends ClassAdapter {
 	 * Add an annotation that should be filtered.
 	 * 
 	 * @param anno the annotation to filter
-	 * @return this instance
 	 */
 
-	public AnnotationParameterVisitor addFiltered(final String anno) {
+	public void addFiltered(final String anno) {
 		this.filtered.add(anno);
-		return this;
 	}
 
 	private boolean isFiltered(final String classname) {

@@ -28,7 +28,7 @@
 	
 	<path id="project.class.path">
 		<fileset dir="${lib}" />
-		<fileset dir="${dist.lib}">
+		<fileset dir="${dist}/lib">
 			<include name="*.jar"/>
 			<exclude name="*-nodeps.jar"/>
 			<exclude name="${out.name}"/>

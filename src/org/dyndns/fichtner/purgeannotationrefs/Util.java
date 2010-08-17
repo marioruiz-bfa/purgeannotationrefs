@@ -1,5 +1,11 @@
 package org.dyndns.fichtner.purgeannotationrefs;
 
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+import org.dyndns.fichtner.purgeannotationrefs.optimizer.ClassOptimizer;
 import org.objectweb.asm.Type;
 
 /**
@@ -8,6 +14,10 @@ import org.objectweb.asm.Type;
  * @author Peter Fichtner
  */
 public final class Util {
+
+	private Util() {
+		throw new IllegalStateException();
+	}
 
 	/**
 	 * Translate the passed Asm type into java classname.
@@ -39,8 +49,28 @@ public final class Util {
 		return "<init>".equals(name);
 	}
 
-	private Util() {
-		throw new IllegalStateException();
+	/**
+	 * Returns <code>true</code> if the passed String donates a class.
+	 * 
+	 * @param arg the file to check
+	 * @return <code>true</code> if the passed String donates a class
+	 */
+	@SuppressWarnings("nls")
+	public static boolean isClass(final String arg) {
+		return arg.toLowerCase().endsWith(".class");
+	}
+
+	/**
+	 * Returns <code>true</code> if the passed String donates a zipfile.
+	 * 
+	 * @param arg the file to check
+	 * @return <code>true</code> if the passed String donates a zipfile
+	 */
+	@SuppressWarnings("nls")
+	public static boolean isZip(final String arg) {
+		final String file = arg.toLowerCase();
+		return file.endsWith(".jar") || file.endsWith(".ear")
+				|| file.endsWith(".zip") || file.endsWith(".war");
 	}
 
 }

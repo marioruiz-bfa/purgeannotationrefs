@@ -44,7 +44,7 @@
 	<target name="preStaticCopy"/>
 	
 	<target name="createDistLib">
-		<mkdir dir="${dist.lib}"/>
+		<mkdir dir="${dist}/lib"/>
 	</target>
 
 	<target name="createDest">
@@ -74,7 +74,7 @@
 	
 	<target name="jarjar" depends="compile">
 		<mkdir dir="${build}"/>
-		<jar destfile="${dist.lib}/${out.name}-${version}.jar" compress="true">
+		<jar destfile="${dist}/lib/${out.name}-${version}.jar" compress="true">
 			<fileset dir="${dest}"/>
 		</jar>
 	</target>
@@ -84,7 +84,7 @@
 	</target>
 	
 	<target name="copyLibToDistLib" depends="checkForLib" if="file.exists.lib">
-		<copy preservelastmodified="true" todir="${dist.lib}" failonerror="false" verbose="false">
+		<copy preservelastmodified="true" todir="${dist}/lib" failonerror="false" verbose="false">
 			<fileset dir="${lib}"/>
 		</copy>
 	</target>
@@ -136,7 +136,7 @@
 	
 	<target name="clean">
 		<delete dir="${build}"/>
-		<delete dir="${dist.lib}"/>
+		<delete dir="${dist}"/>
 	</target>
 
 	<target name="clean-all" depends="clean-depend, clean"/>

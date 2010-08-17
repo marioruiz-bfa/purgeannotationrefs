@@ -3,7 +3,6 @@ package org.dyndns.fichtner.purgeannotationrefs.visitors;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.dyndns.fichtner.purgeannotationrefs.Util;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
@@ -15,7 +14,8 @@ import org.objectweb.asm.FieldVisitor;
  * 
  * @author Peter Fichtner
  */
-public class AnnotationFieldVisitor extends ClassAdapter {
+public class AnnotationFieldVisitor extends ClassAdapter implements
+		FilteringVisitor {
 
 	private final List<String> filtered = new ArrayList<String>();
 
@@ -32,11 +32,9 @@ public class AnnotationFieldVisitor extends ClassAdapter {
 	 * Add an annotation that should be filtered.
 	 * 
 	 * @param anno the annotation to filter
-	 * @return this instance
 	 */
-	public AnnotationFieldVisitor addFiltered(final String anno) {
+	public void addFiltered(final String anno) {
 		this.filtered.add(anno);
-		return this;
 	}
 
 	private boolean isFiltered(final String classname) {
