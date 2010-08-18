@@ -1,5 +1,7 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
+import org.dyndns.fichtner.purgeannotationrefs.Matcher;
+
 /**
  * Visitors that are able to filter annotations.
  * 
@@ -10,8 +12,8 @@ public interface FilteringVisitor {
 	/**
 	 * Add the passed annotation to the list of filtered annotations.
 	 * 
-	 * @param anno the annotation to filter
+	 * @param matcher the annotation to filter
 	 */
-	void addFiltered(final String anno);
+	void addFiltered(final Matcher matcher);
 
 }

@@ -1,11 +1,7 @@
 package org.dyndns.fichtner.purgeannotationrefs;
 
-import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+import java.util.Collection;
 
-import org.dyndns.fichtner.purgeannotationrefs.optimizer.ClassOptimizer;
 import org.objectweb.asm.Type;
 
 /**
@@ -71,6 +67,23 @@ public final class Util {
 		final String file = arg.toLowerCase();
 		return file.endsWith(".jar") || file.endsWith(".ear")
 				|| file.endsWith(".zip") || file.endsWith(".war");
+	}
+
+	/**
+	 * Cehcks if one of the matches matches the passed String.
+	 * 
+	 * @param matchers List of matches
+	 * @param string the String to check
+	 * @return <code>true</code> if one of the matcher matches
+	 */
+	public static boolean matches(final Collection<Matcher> matchers,
+			final String string) {
+		for (final Matcher matcher : matchers) {
+			if (matcher.matches(string)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

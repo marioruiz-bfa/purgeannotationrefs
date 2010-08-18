@@ -3,6 +3,7 @@ package org.dyndns.fichtner.purgeannotationrefs.visitors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dyndns.fichtner.purgeannotationrefs.Matcher;
 import org.dyndns.fichtner.purgeannotationrefs.Util;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
@@ -18,7 +19,7 @@ import org.objectweb.asm.MethodVisitor;
 public class DefaultAnnotationMethodVisitor extends ClassAdapter implements
 		FilteringVisitor {
 
-	private final List<String> filtered = new ArrayList<String>();
+	private final List<Matcher> filtered = new ArrayList<Matcher>();
 
 	/**
 	 * Creates a new instance delegating all calls to the passed visitor.
@@ -32,15 +33,11 @@ public class DefaultAnnotationMethodVisitor extends ClassAdapter implements
 	/**
 	 * Add an annotation that should be filtered.
 	 * 
-	 * @param anno the annotation to filter
+	 * @param matcher the annotation to filter
 	 */
 
-	public void addFiltered(final String anno) {
-		this.filtered.add(anno);
-	}
-
-	private boolean isFiltered(final String classname) {
-		return this.filtered.contains(classname);
+	public void addFiltered(final Matcher matcher) {
+		this.filtered.add(matcher);
 	}
 
 	@Override
@@ -51,7 +48,9 @@ public class DefaultAnnotationMethodVisitor extends ClassAdapter implements
 			@Override
 			public AnnotationVisitor visitAnnotation(final String name,
 					final boolean arg1) {
-				return isFiltered(Util.translate(name)) ? null : super
+				return Util.matches(
+						DefaultAnnotationMethodVisitor.this.filtered, Util
+								.translate(name)) ? null : super
 						.visitAnnotation(name, arg1);
 			}
 		};

@@ -3,6 +3,7 @@ package org.dyndns.fichtner.purgeannotationrefs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -26,26 +27,22 @@ import org.objectweb.asm.ClassWriter;
 public class AnnotationReferenceRemover implements ClassOptimizer {
 
 	private static class Config {
-		private final EnumMap<RemoveFrom, List<String>> map = new EnumMap<RemoveFrom, List<String>>(
-				RemoveFrom.class);
+		private final EnumMap<ElementType, List<Matcher>> map = new EnumMap<ElementType, List<Matcher>>(
+				ElementType.class);
 
-		public void addFiltered(final RemoveFrom key, final String anno) {
-			List<String> data = this.map.get(key);
+		public void addFiltered(final ElementType key, final Matcher matcher) {
+			List<Matcher> data = this.map.get(key);
 			if (data == null) {
-				data = new ArrayList<String>();
+				data = new ArrayList<Matcher>();
 				this.map.put(key, data);
 			}
-			data.add(anno);
+			data.add(matcher);
 		}
 
-		public List<String> getFiltered(final RemoveFrom key) {
+		public List<Matcher> getFiltered(final ElementType key) {
 			return this.map.get(key);
 		}
 
-	}
-
-	private enum RemoveFrom {
-		CLASS_HEADER, CONSTRUCTORS, METHODS, FIELDS, PARAMETERS;
 	}
 
 	private final Config config = new Config();
@@ -102,72 +99,28 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * Remove the passed annotation from <b>all</b> elements (class/methods/...)
 	 * (if present).
 	 * 
-	 * @param anno the annotation that should be removed
+	 * @param matcher the annotation that should be removed
 	 * @return this instance
 	 */
-	public AnnotationReferenceRemover remove(final String anno) {
-		removeFromClass(anno);
-		removeFromFields(anno);
-		removeFromConstructors(anno);
-		removeFromMethods(anno);
-		removeFromParameters(anno);
-		// TODO statements, ...?
+	public AnnotationReferenceRemover remove(final Matcher matcher) {
+		removeFrom(ElementType.TYPE, matcher);
+		removeFrom(ElementType.FIELD, matcher);
+		removeFrom(ElementType.CONSTRUCTOR, matcher);
+		removeFrom(ElementType.METHOD, matcher);
+		removeFrom(ElementType.PARAMETER, matcher);
 		return this;
 	}
 
 	/**
-	 * Remove the passed annotation from the class only (if present).
+	 * Remove the passed annotation from the passed elements (if present).
 	 * 
-	 * @param anno the annotation that should be removed
+	 * @param removeFrom remove from which elements
+	 * @param matcher the annotation that should be removed
 	 * @return this instance
 	 */
-	public AnnotationReferenceRemover removeFromClass(final String anno) {
-		this.config.addFiltered(RemoveFrom.CLASS_HEADER, anno);
-		return this;
-	}
-
-	/**
-	 * Remove the passed annotation from the fields only (if present).
-	 * 
-	 * @param anno the annotation that should be removed
-	 * @return this instance
-	 */
-	public AnnotationReferenceRemover removeFromFields(final String anno) {
-		this.config.addFiltered(RemoveFrom.FIELDS, anno);
-		return this;
-	}
-
-	/**
-	 * Remove the passed annotation from the constructors only (if present).
-	 * 
-	 * @param anno the annotation that should be removed
-	 * @return this instance
-	 */
-	public AnnotationReferenceRemover removeFromConstructors(final String anno) {
-		this.config.addFiltered(RemoveFrom.CONSTRUCTORS, anno);
-		return this;
-	}
-
-	/**
-	 * Remove the passed annotation from the methods only (if present).
-	 * 
-	 * @param anno the annotation that should be removed
-	 * @return this instance
-	 */
-	public AnnotationReferenceRemover removeFromMethods(final String anno) {
-		this.config.addFiltered(RemoveFrom.METHODS, anno);
-		return this;
-	}
-
-	/**
-	 * Remove the passed annotation from the method and constructor parameters
-	 * only (if present).
-	 * 
-	 * @param anno the annotation that should be removed
-	 * @return this instance
-	 */
-	public AnnotationReferenceRemover removeFromParameters(final String anno) {
-		this.config.addFiltered(RemoveFrom.PARAMETERS, anno);
+	public AnnotationReferenceRemover removeFrom(final ElementType removeFrom,
+			final Matcher matcher) {
+		this.config.addFiltered(removeFrom, matcher);
 		return this;
 	}
 
@@ -207,37 +160,37 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	private AnnotationParameterVisitor createParameterVisitor(
 			final AnnotationFieldVisitor fieldVisitor) {
 		return configure(new AnnotationParameterVisitor(fieldVisitor),
-				RemoveFrom.PARAMETERS);
+				ElementType.PARAMETER);
 	}
 
 	private AnnotationFieldVisitor createFieldVisitor(
 			final AnnotationMethodVisitor methodVisitor) {
 		return configure(new AnnotationFieldVisitor(methodVisitor),
-				RemoveFrom.FIELDS);
+				ElementType.FIELD);
 	}
 
 	private AnnotationMethodVisitor createMethodVisitor(
 			final AnnotationConstructorVisitor constructorVisitor) {
 		return configure(new AnnotationMethodVisitor(constructorVisitor),
-				RemoveFrom.METHODS);
+				ElementType.METHOD);
 	}
 
 	private AnnotationConstructorVisitor createConstructorVisitor(
 			final AnnotationClassVisitor classVisitor) {
 		return configure(new AnnotationConstructorVisitor(classVisitor),
-				RemoveFrom.CONSTRUCTORS);
+				ElementType.CONSTRUCTOR);
 	}
 
 	private AnnotationClassVisitor createClassVisitor(
 			final ClassWriter classWriter) {
 		return configure(new AnnotationClassVisitor(classWriter),
-				RemoveFrom.CLASS_HEADER);
+				ElementType.TYPE);
 	}
 
 	private <T extends FilteringVisitor> T configure(final T filteringVisitor,
-			final RemoveFrom removeFrom) {
-		for (final String anno : this.config.getFiltered(removeFrom)) {
-			filteringVisitor.addFiltered(anno);
+			final ElementType removeFrom) {
+		for (final Matcher matcher : this.config.getFiltered(removeFrom)) {
+			filteringVisitor.addFiltered(matcher);
 		}
 		return filteringVisitor;
 	}
