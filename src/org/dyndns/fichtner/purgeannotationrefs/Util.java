@@ -70,7 +70,7 @@ public final class Util {
 	}
 
 	/**
-	 * Cehcks if one of the matches matches the passed String.
+	 * Checks if one of the matches matches the passed String.
 	 * 
 	 * @param matchers List of matches
 	 * @param string the String to check
