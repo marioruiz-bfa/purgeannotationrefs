@@ -27,14 +27,14 @@ import org.objectweb.asm.ClassWriter;
 public class AnnotationReferenceRemover implements ClassOptimizer {
 
 	private static class Config {
+
 		private final EnumMap<ElementType, List<Matcher>> map = new EnumMap<ElementType, List<Matcher>>(
 				ElementType.class);
 
 		public void addFiltered(final ElementType key, final Matcher matcher) {
 			List<Matcher> data = this.map.get(key);
 			if (data == null) {
-				data = new ArrayList<Matcher>();
-				this.map.put(key, data);
+				this.map.put(key, data = new ArrayList<Matcher>());
 			}
 			data.add(matcher);
 		}
@@ -53,6 +53,10 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @author Peter Fichtner
 	 */
 	public static enum RewriteMode {
+		/**
+		 * Rewrite all attributes
+		 */
+		ALL(0),
 		/**
 		 * @see ClassReader.EXPAND_FRAMES
 		 */
@@ -84,7 +88,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 
 	}
 
-	private RewriteMode rewriteMode = RewriteMode.SKIP_DEBUG;
+	private RewriteMode rewriteMode = RewriteMode.ALL;
 
 	/**
 	 * Creates a new instance for the passed class (.class-file/bytecode). This
@@ -93,6 +97,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @param classfile path to the classfile
 	 */
 	public AnnotationReferenceRemover() {
+		super();
 	}
 
 	/**
