@@ -1,5 +1,7 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
+import static org.dyndns.fichtner.purgeannotationrefs.Util.atLeastOneMatches;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,14 +41,16 @@ public class AnnotationFieldVisitor extends ClassAdapter implements
 	}
 
 	@Override
-	public FieldVisitor visitField(int arg0, String arg1, String arg2,
-			String arg3, Object arg4) {
-		return new FieldAdapter(this.cv
-				.visitField(arg0, arg1, arg2, arg3, arg4)) {
+	public FieldVisitor visitField(int access, String name, String desc,
+			String signature, Object value) {
+		return new FieldAdapter(this.cv.visitField(access, name, desc,
+				signature, value)) {
 			@Override
-			public AnnotationVisitor visitAnnotation(String arg0, boolean arg1) {
-				return Util.matches(AnnotationFieldVisitor.this.filtered, Util.translate(arg0)) ? null
-						: super.visitAnnotation(arg0, arg1);
+			public AnnotationVisitor visitAnnotation(String desc,
+					boolean visible) {
+				return atLeastOneMatches(AnnotationFieldVisitor.this.filtered,
+						Util.translate(desc)) ? null : super.visitAnnotation(
+						desc, visible);
 			}
 		};
 	}

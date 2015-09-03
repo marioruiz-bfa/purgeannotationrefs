@@ -1,5 +1,7 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
+import static org.dyndns.fichtner.purgeannotationrefs.Util.atLeastOneMatches;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,12 +48,12 @@ public class DefaultAnnotationMethodVisitor extends ClassAdapter implements
 		return new MethodAdapter(this.cv.visitMethod(access, name, desc,
 				signature, exceptions)) {
 			@Override
-			public AnnotationVisitor visitAnnotation(final String name,
-					final boolean arg1) {
-				return Util.matches(
-						DefaultAnnotationMethodVisitor.this.filtered, Util
-								.translate(name)) ? null : super
-						.visitAnnotation(name, arg1);
+			public AnnotationVisitor visitAnnotation(final String desc,
+					final boolean visible) {
+				return atLeastOneMatches(
+						DefaultAnnotationMethodVisitor.this.filtered,
+						Util.translate(desc)) ? null : super.visitAnnotation(
+						desc, visible);
 			}
 		};
 	}

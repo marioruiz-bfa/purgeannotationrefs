@@ -23,9 +23,9 @@ public class FieldAdapter implements FieldVisitor {
 		this.fv = fv;
 	}
 
-	public AnnotationVisitor visitAnnotation(final String string,
-			final boolean b) {
-		return this.fv.visitAnnotation(string, b);
+	public AnnotationVisitor visitAnnotation(final String desc,
+			final boolean visible) {
+		return this.fv.visitAnnotation(desc, visible);
 	}
 
 	public void visitAttribute(final Attribute attribute) {
