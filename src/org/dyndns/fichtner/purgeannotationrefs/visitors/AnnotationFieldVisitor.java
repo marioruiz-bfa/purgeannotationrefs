@@ -1,14 +1,14 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
 import static org.dyndns.fichtner.purgeannotationrefs.Util.atLeastOneMatches;
+import static org.dyndns.fichtner.purgeannotationrefs.Util.typeToClassname;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dyndns.fichtner.purgeannotationrefs.Matcher;
-import org.dyndns.fichtner.purgeannotationrefs.Util;
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 
@@ -17,10 +17,10 @@ import org.objectweb.asm.FieldVisitor;
  * 
  * @author Peter Fichtner
  */
-public class AnnotationFieldVisitor extends ClassAdapter implements
+public class AnnotationFieldVisitor extends ClassVisitor implements
 		FilteringVisitor {
 
-	private final List<Matcher> filtered = new ArrayList<Matcher>();
+	private final List<Matcher<String>> filtered = new ArrayList<Matcher<String>>();
 
 	/**
 	 * Creates a new instance delegating all calls to the passed visitor.
@@ -28,7 +28,7 @@ public class AnnotationFieldVisitor extends ClassAdapter implements
 	 * @param classVisitor delegate visitor
 	 */
 	public AnnotationFieldVisitor(final ClassVisitor classVisitor) {
-		super(classVisitor);
+		super(ASM5, classVisitor);
 	}
 
 	/**
@@ -36,20 +36,20 @@ public class AnnotationFieldVisitor extends ClassAdapter implements
 	 * 
 	 * @param matcher the annotation to filter
 	 */
-	public void addFiltered(final Matcher matcher) {
+	public void addFiltered(final Matcher<String> matcher) {
 		this.filtered.add(matcher);
 	}
 
 	@Override
 	public FieldVisitor visitField(int access, String name, String desc,
 			String signature, Object value) {
-		return new FieldAdapter(this.cv.visitField(access, name, desc,
+		return new FieldVisitor(ASM5, this.cv.visitField(access, name, desc,
 				signature, value)) {
 			@Override
 			public AnnotationVisitor visitAnnotation(String desc,
 					boolean visible) {
 				return atLeastOneMatches(AnnotationFieldVisitor.this.filtered,
-						Util.translate(desc)) ? null : super.visitAnnotation(
+						typeToClassname(desc)) ? null : super.visitAnnotation(
 						desc, visible);
 			}
 		};

@@ -19,8 +19,8 @@ public final class Util {
 	 * @param type the type to tranlsate
 	 * @return java classname
 	 */
-	public static String translate(final String type) {
-		return Type.getType(type).getInternalName().replace('/', '.');
+	public static String typeToClassname(final String type) {
+		return Type.getType(type).getClassName();
 	}
 
 	/**
@@ -84,9 +84,9 @@ public final class Util {
 	 * @param string the String to check
 	 * @return <code>true</code> if one of the matcher matches
 	 */
-	public static boolean atLeastOneMatches(final Iterable<Matcher> matchers,
+	public static boolean atLeastOneMatches(final Iterable<Matcher<String>> matchers,
 			final String string) {
-		for (final Matcher matcher : matchers) {
+		for (final Matcher<String> matcher : matchers) {
 			if (matcher.matches(string)) {
 				return true;
 			}

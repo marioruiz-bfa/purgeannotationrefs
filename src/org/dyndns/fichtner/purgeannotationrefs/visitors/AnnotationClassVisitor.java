@@ -1,14 +1,14 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
 import static org.dyndns.fichtner.purgeannotationrefs.Util.atLeastOneMatches;
+import static org.dyndns.fichtner.purgeannotationrefs.Util.typeToClassname;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dyndns.fichtner.purgeannotationrefs.Matcher;
-import org.dyndns.fichtner.purgeannotationrefs.Util;
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 
 /**
@@ -16,10 +16,10 @@ import org.objectweb.asm.ClassVisitor;
  * 
  * @author Peter Fichtner
  */
-public class AnnotationClassVisitor extends ClassAdapter implements
+public class AnnotationClassVisitor extends ClassVisitor implements
 		FilteringVisitor {
 
-	private final List<Matcher> filtered = new ArrayList<Matcher>();
+	private final List<Matcher<String>> filtered = new ArrayList<Matcher<String>>();
 
 	/**
 	 * Creates a new instance delegating all calls to the passed visitor.
@@ -27,7 +27,7 @@ public class AnnotationClassVisitor extends ClassAdapter implements
 	 * @param classVisitor delegate visitor
 	 */
 	public AnnotationClassVisitor(final ClassVisitor classVisitor) {
-		super(classVisitor);
+		super(ASM5, classVisitor);
 	}
 
 	/**
@@ -35,14 +35,14 @@ public class AnnotationClassVisitor extends ClassAdapter implements
 	 * 
 	 * @param matcher the annotation to filter
 	 */
-	public void addFiltered(final Matcher matcher) {
+	public void addFiltered(final Matcher<String> matcher) {
 		this.filtered.add(matcher);
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc,
 			final boolean visible) {
-		return atLeastOneMatches(this.filtered, Util.translate(desc)) ? null
+		return atLeastOneMatches(this.filtered, typeToClassname(desc)) ? null
 				: super.visitAnnotation(desc, visible);
 	}
 

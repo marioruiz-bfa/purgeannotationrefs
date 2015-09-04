@@ -1,12 +1,20 @@
 package org.dyndns.fichtner.purgeannotationrefs;
 
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Set;
 
 import org.dyndns.fichtner.purgeannotationrefs.optimizer.ClassOptimizer;
 import org.dyndns.fichtner.purgeannotationrefs.visitors.AnnotationClassVisitor;
@@ -40,7 +48,9 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 		}
 
 		public List<Matcher> getFiltered(final ElementType key) {
-			return this.map.get(key);
+			List<Matcher> matchers = this.map.get(key);
+			return matchers == null ? Collections.<Matcher> emptyList()
+					: matchers;
 		}
 
 	}
@@ -53,10 +63,6 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @author Peter Fichtner
 	 */
 	public static enum RewriteMode {
-		/**
-		 * Rewrite all attributes
-		 */
-		ALL(0),
 		/**
 		 * @see ClassReader.EXPAND_FRAMES
 		 */
@@ -88,7 +94,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 
 	}
 
-	private RewriteMode rewriteMode = RewriteMode.ALL;
+	private Set<RewriteMode> rewriteMode = Collections.emptySet();
 
 	/**
 	 * Creates a new instance for the passed class (.class-file/bytecode). This
@@ -134,8 +140,16 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * 
 	 * @param rewriteMode the rewrite mode to set
 	 */
-	public void setRewriteMode(final RewriteMode rewriteMode) {
+	public void setRewriteMode(Set<RewriteMode> rewriteMode) {
 		this.rewriteMode = rewriteMode;
+	}
+
+	private static int toInt(Iterable<RewriteMode> rewriteModes) {
+		int value = 0;
+		for (RewriteMode rewriteMode : rewriteModes) {
+			value |= rewriteMode.value;
+		}
+		return value;
 	}
 
 	/**
@@ -153,7 +167,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 		final ClassWriter classWriter = new ClassWriter(
 				ClassWriter.COMPUTE_MAXS);
 		new ClassReader(inputStream).accept(createVisitors(classWriter),
-				this.rewriteMode.getValue());
+				toInt(this.rewriteMode));
 		outputStream.write(classWriter.toByteArray());
 	}
 
@@ -165,31 +179,29 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	private AnnotationParameterVisitor createParameterVisitor(
 			final AnnotationFieldVisitor fieldVisitor) {
 		return configure(new AnnotationParameterVisitor(fieldVisitor),
-				ElementType.PARAMETER);
+				PARAMETER);
 	}
 
 	private AnnotationFieldVisitor createFieldVisitor(
 			final AnnotationMethodVisitor methodVisitor) {
-		return configure(new AnnotationFieldVisitor(methodVisitor),
-				ElementType.FIELD);
+		return configure(new AnnotationFieldVisitor(methodVisitor), FIELD);
 	}
 
 	private AnnotationMethodVisitor createMethodVisitor(
 			final AnnotationConstructorVisitor constructorVisitor) {
 		return configure(new AnnotationMethodVisitor(constructorVisitor),
-				ElementType.METHOD);
+				METHOD);
 	}
 
 	private AnnotationConstructorVisitor createConstructorVisitor(
 			final AnnotationClassVisitor classVisitor) {
 		return configure(new AnnotationConstructorVisitor(classVisitor),
-				ElementType.CONSTRUCTOR);
+				CONSTRUCTOR);
 	}
 
 	private AnnotationClassVisitor createClassVisitor(
 			final ClassWriter classWriter) {
-		return configure(new AnnotationClassVisitor(classWriter),
-				ElementType.TYPE);
+		return configure(new AnnotationClassVisitor(classWriter), TYPE);
 	}
 
 	private <T extends FilteringVisitor> T configure(final T filteringVisitor,

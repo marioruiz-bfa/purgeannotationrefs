@@ -1,9 +1,8 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
+import static org.dyndns.fichtner.purgeannotationrefs.Util.isConstructor;
 
-import org.dyndns.fichtner.purgeannotationrefs.Util;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
 
 /**
@@ -26,9 +25,9 @@ public class AnnotationConstructorVisitor extends
 	@Override
 	public MethodVisitor visitMethod(final int access, final String name,
 			final String desc, final String signature, final String[] exceptions) {
-		return Util.isConstructor(name) ? super.visitMethod(access, name, desc,
-				signature, exceptions) : new MethodAdapter(this.cv.visitMethod(
-				access, name, desc, signature, exceptions));
+		return isConstructor(name) ? super.visitMethod(access, name, desc,
+				signature, exceptions) : this.cv.visitMethod(access, name,
+				desc, signature, exceptions);
 	}
 
 }

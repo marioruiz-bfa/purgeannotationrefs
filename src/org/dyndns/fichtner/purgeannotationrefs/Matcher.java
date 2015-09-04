@@ -6,15 +6,16 @@ import java.util.regex.Pattern;
  * Matcher implementations decide whether a passed string matches or not.
  * 
  * @author Peter Fichtner
+ * @param <T> type
  */
-public interface Matcher {
+public interface Matcher<T> {
 
 	/**
 	 * A RegExp based matcher (matches if the two Strings are equals).
 	 * 
 	 * @author Peter Fichtner
 	 */
-	public class StringMatcher implements Matcher {
+	public class StringMatcher implements Matcher<String> {
 
 		private final String pattern;
 
@@ -39,7 +40,7 @@ public interface Matcher {
 	 * 
 	 * @author Peter Fichtner
 	 */
-	public class RegExpMatcher implements Matcher {
+	public class RegExpMatcher implements Matcher<String> {
 
 		private final Pattern pattern;
 
@@ -59,11 +60,11 @@ public interface Matcher {
 	}
 
 	/**
-	 * Returns <code>true</code> if the passed String matches.
+	 * Returns <code>true</code> if the passed T matches.
 	 * 
-	 * @param pattern the String to check
-	 * @return <code>true</code> if the passed String matches
+	 * @param t the value to check
+	 * @return <code>true</code> if the passed T matches
 	 */
-	boolean matches(String pattern);
+	boolean matches(T t);
 
 }

@@ -14,6 +14,6 @@ public interface FilteringVisitor {
 	 * 
 	 * @param matcher the annotation to filter
 	 */
-	void addFiltered(final Matcher matcher);
+	void addFiltered(final Matcher<String> matcher);
 
 }
