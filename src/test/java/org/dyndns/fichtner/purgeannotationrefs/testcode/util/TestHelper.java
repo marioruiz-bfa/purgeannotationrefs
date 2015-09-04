@@ -34,18 +34,18 @@ public final class TestHelper {
 		private final AnnotationReferenceRemover remover = new AnnotationReferenceRemover();
 
 		public ReferenceRemoverConfigurer remove(Matcher matcher) {
-			remover.remove(matcher);
+			this.remover.remove(matcher);
 			return this;
 		}
 
 		public ReferenceRemoverConfigurer removeFrom(ElementType removeFrom,
 				Matcher matcher) {
-			remover.removeFrom(removeFrom, matcher);
+			this.remover.removeFrom(removeFrom, matcher);
 			return this;
 		}
 
 		public AnnotationReferenceRemover build() {
-			return remover;
+			return this.remover;
 		}
 
 	}

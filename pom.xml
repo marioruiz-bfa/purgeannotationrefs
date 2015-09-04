@@ -12,7 +12,6 @@
 	</properties>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -30,6 +29,13 @@
 			<artifactId>asm-all</artifactId>
 			<version>5.0.3</version>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>
