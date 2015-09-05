@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.dyndns.fichtner.purgeannotationrefs</groupId>
+	<artifactId>ant</artifactId>
+	<version>0.3.2-SNAPSHOT</version>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<finalName>par_ant-${project.version}</finalName>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<shadedClassifierName>shaded</shadedClassifierName>
+					<minimizeJar>true</minimizeJar>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+					<artifactSet>
+						<excludes>
+							<exclude>org.apache.ant:ant</exclude>
+							<exclude>org.apache.ant:ant-launcher</exclude>
+						</excludes>
+					</artifactSet>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.dyndns.fichtner.purgeannotationrefs</groupId>
+			<artifactId>library</artifactId>
+			<version>0.3.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.7.0</version>
+		</dependency>
+	</dependencies>
+
+</project>
