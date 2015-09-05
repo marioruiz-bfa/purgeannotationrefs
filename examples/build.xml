@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="project" default="default">
+
+	<target name="default" description="description">
+		<taskdef classpath="../purgeannotationrefs_ant/dist/lib/par_ant-0.3.1-nodeps.jar" resource="org/dyndns/fichtner/purgeannotationrefs/tasks/antlib.xml" />
+		<purgeannotationrefs>
+			<fileset dir="../purgeannotationrefs/classes">
+				<filename name="**/*.class"/>
+			</fileset>
+			<remove annotation="com.example.Foobar" from="METHODS"/>
+		</purgeannotationrefs>
+	</target>
+
+</project>
