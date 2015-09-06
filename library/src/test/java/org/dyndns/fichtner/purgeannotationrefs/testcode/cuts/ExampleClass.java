@@ -30,8 +30,14 @@ public class ExampleClass {
 		super();
 	}
 
+	public ExampleClass(long bar) {
+		this((int) bar);
+	}
+
 	public static void main(String[] args) throws IOException,
 			SecurityException, NoSuchMethodException, NoSuchFieldException {
+		// Local variable annotations are not retained in class files (JLS
+		// 9.6.1.2)
 		@MyAnno(LOCAL_VARIABLE)
 		int v = 9;
 		new ExampleClass(7).foobar(v);
@@ -67,6 +73,10 @@ public class ExampleClass {
 						"annotatedField").getAnnotations()));
 		System.out.println(this.field);
 		System.out.println(this.annotatedField);
+	}
+
+	private void methodWithoutAnnotation() {
+		System.out.println("anotherMethod");
 	}
 
 }
