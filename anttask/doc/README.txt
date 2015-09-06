@@ -18,7 +18,7 @@ HOW TO USE
 	</purgeannotationrefs>
 
 
-<!-- remove all references to com.example.AnnoName from methods only -->
+<!-- remove all references to com.example.AnnoName from methods and constructors only -->
 
 	<purgeannotationrefs>
 		<src>
@@ -26,5 +26,6 @@ HOW TO USE
 				<filename name="**/*.class" />
 			</fileset>
 		</src>
-		<remove annotation="com.example.AnnoName" from="METHODS" />
+		<remove annotation="com.example.AnnoName" from="METHOD" />
+		<remove annotation="com.example.AnnoName" from="CONSTRUCTOR" />
 	</purgeannotationrefs>
