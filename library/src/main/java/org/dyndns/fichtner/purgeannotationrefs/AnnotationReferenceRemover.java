@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -34,22 +35,27 @@ import org.objectweb.asm.ClassWriter;
  */
 public class AnnotationReferenceRemover implements ClassOptimizer {
 
+	private final static List<ElementType> supportedTypes = Collections
+			.unmodifiableList(Arrays.asList(TYPE, FIELD, CONSTRUCTOR, METHOD,
+					PARAMETER));
+
 	private static class Config {
 
-		private final EnumMap<ElementType, List<Matcher>> map = new EnumMap<ElementType, List<Matcher>>(
+		private final EnumMap<ElementType, List<Matcher<String>>> map = new EnumMap<ElementType, List<Matcher<String>>>(
 				ElementType.class);
 
-		public void addFiltered(final ElementType key, final Matcher matcher) {
-			List<Matcher> data = this.map.get(key);
+		public void addFiltered(final ElementType key,
+				final Matcher<String> matcher) {
+			List<Matcher<String>> data = this.map.get(key);
 			if (data == null) {
-				this.map.put(key, data = new ArrayList<Matcher>());
+				this.map.put(key, data = new ArrayList<Matcher<String>>());
 			}
 			data.add(matcher);
 		}
 
-		public List<Matcher> getFiltered(final ElementType key) {
-			List<Matcher> matchers = this.map.get(key);
-			return matchers == null ? Collections.<Matcher> emptyList()
+		public List<Matcher<String>> getFiltered(final ElementType key) {
+			List<Matcher<String>> matchers = this.map.get(key);
+			return matchers == null ? Collections.<Matcher<String>> emptyList()
 					: matchers;
 		}
 
@@ -113,12 +119,10 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @param matcher the annotation that should be removed
 	 * @return this instance
 	 */
-	public AnnotationReferenceRemover remove(final Matcher matcher) {
-		removeFrom(ElementType.TYPE, matcher);
-		removeFrom(ElementType.FIELD, matcher);
-		removeFrom(ElementType.CONSTRUCTOR, matcher);
-		removeFrom(ElementType.METHOD, matcher);
-		removeFrom(ElementType.PARAMETER, matcher);
+	public AnnotationReferenceRemover remove(final Matcher<String> matcher) {
+		for (ElementType elementType : supportedTypes) {
+			removeFrom(elementType, matcher);
+		}
 		return this;
 	}
 
@@ -130,7 +134,11 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @return this instance
 	 */
 	public AnnotationReferenceRemover removeFrom(final ElementType removeFrom,
-			final Matcher matcher) {
+			final Matcher<String> matcher) {
+		if (!supportedTypes.contains(removeFrom)) {
+			throw new IllegalArgumentException(removeFrom
+					+ " not supported, supported types are " + supportedTypes);
+		}
 		this.config.addFiltered(removeFrom, matcher);
 		return this;
 	}
@@ -206,7 +214,8 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 
 	private <T extends FilteringVisitor> T configure(final T filteringVisitor,
 			final ElementType removeFrom) {
-		for (final Matcher matcher : this.config.getFiltered(removeFrom)) {
+		for (final Matcher<String> matcher : this.config
+				.getFiltered(removeFrom)) {
 			filteringVisitor.addFiltered(matcher);
 		}
 		return filteringVisitor;
