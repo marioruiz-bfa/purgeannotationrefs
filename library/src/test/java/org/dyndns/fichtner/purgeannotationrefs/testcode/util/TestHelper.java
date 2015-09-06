@@ -58,7 +58,7 @@ public final class TestHelper {
 			ReferenceRemoverConfigurer builder) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		try {
-			builder.build().optimize(TestHelper.classAsStream(clazz), os);
+			builder.build().optimize(classAsStream(clazz), os);
 			return os.toByteArray();
 		} finally {
 			os.close();
