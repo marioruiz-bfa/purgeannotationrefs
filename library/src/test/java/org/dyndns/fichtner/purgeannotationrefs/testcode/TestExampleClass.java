@@ -2,10 +2,10 @@ package org.dyndns.fichtner.purgeannotationrefs.testcode;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
-import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.TestHelper.configurerer;
 import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.TestHelper.removeAnno;
 import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.jasmin.JasminUtil.classToJasmin;
 import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.jasmin.JasminUtil.streamToJasmin;
@@ -18,6 +18,7 @@ import java.lang.annotation.ElementType;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
 import org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleClass;
 import org.hamcrest.Matcher;
@@ -37,6 +38,7 @@ public class TestExampleClass {
 		assertThat(count(dump, isAnno(annoClazz), CONSTRUCTOR), is(1));
 		assertThat(count(dump, isAnno(annoClazz), METHOD), is(1));
 		assertThat(count(dump, isAnno(annoClazz), PARAMETER), is(1));
+		assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLE), is(0));
 	}
 
 	@Test
@@ -44,7 +46,8 @@ public class TestExampleClass {
 			throws IOException {
 		ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
 				ExampleClass.class,
-				configurerer().remove(new StringMatcher(annoClazz.getName()))));
+				new AnnotationReferenceRemover().remove(new StringMatcher(
+						annoClazz.getName()))));
 		try {
 			assertAnnoCountIs(0, streamToJasmin(is).split("\\n"));
 		} finally {
@@ -75,7 +78,7 @@ public class TestExampleClass {
 	private void removeOnlyType(ElementType toRemove) throws IOException {
 		ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
 				ExampleClass.class,
-				configurerer().removeFrom(toRemove,
+				new AnnotationReferenceRemover().removeFrom(toRemove,
 						new StringMatcher(annoClazz.getName()))));
 		try {
 			String[] dump = streamToJasmin(is).split("\\n");
@@ -86,6 +89,8 @@ public class TestExampleClass {
 			assertCount(toRemove, dump, PARAMETER);
 			// Local variable annotations are not retained in class files (JLS
 			// 9.6.1.2)
+			assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLE), is(0));
+
 		} finally {
 			is.close();
 		}

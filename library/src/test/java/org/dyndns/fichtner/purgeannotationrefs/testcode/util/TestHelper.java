@@ -6,11 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.ElementType;
 import java.net.URL;
 
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
-import org.dyndns.fichtner.purgeannotationrefs.Matcher;
 
 public final class TestHelper {
 
@@ -29,36 +27,11 @@ public final class TestHelper {
 		return bytes;
 	}
 
-	public static class ReferenceRemoverConfigurer {
-
-		private final AnnotationReferenceRemover remover = new AnnotationReferenceRemover();
-
-		public ReferenceRemoverConfigurer remove(Matcher matcher) {
-			this.remover.remove(matcher);
-			return this;
-		}
-
-		public ReferenceRemoverConfigurer removeFrom(ElementType removeFrom,
-				Matcher matcher) {
-			this.remover.removeFrom(removeFrom, matcher);
-			return this;
-		}
-
-		public AnnotationReferenceRemover build() {
-			return this.remover;
-		}
-
-	}
-
-	public static ReferenceRemoverConfigurer configurerer() {
-		return new ReferenceRemoverConfigurer();
-	}
-
 	public static byte[] removeAnno(Class<?> clazz,
-			ReferenceRemoverConfigurer builder) throws IOException {
+			AnnotationReferenceRemover remover) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		try {
-			builder.build().optimize(classAsStream(clazz), os);
+			remover.optimize(classAsStream(clazz), os);
 			return os.toByteArray();
 		} finally {
 			os.close();
