@@ -2,7 +2,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>anttask</artifactId>
-	<version>0.3.2-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.dyndns.fichtner.purgeannotationrefs</groupId>
@@ -30,12 +29,6 @@
 					<shadedClassifierName>shaded</shadedClassifierName>
 					<minimizeJar>true</minimizeJar>
 					<createDependencyReducedPom>false</createDependencyReducedPom>
-					<artifactSet>
-						<excludes>
-							<exclude>org.apache.ant:ant</exclude>
-							<exclude>org.apache.ant:ant-launcher</exclude>
-						</excludes>
-					</artifactSet>
 				</configuration>
 			</plugin>
 
@@ -52,6 +45,7 @@
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
 			<version>1.7.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
