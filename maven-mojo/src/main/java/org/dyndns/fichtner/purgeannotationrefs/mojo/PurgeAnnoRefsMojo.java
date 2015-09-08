@@ -1,5 +1,7 @@
 package org.dyndns.fichtner.purgeannotationrefs.mojo;
 
+import static java.util.Collections.unmodifiableMap;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,13 +10,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -25,32 +31,23 @@ import org.dyndns.fichtner.purgeannotationrefs.Matcher.RegExpMatcher;
 /**
  * Removes annotation references from classfiles.
  */
-@Mojo(name = "process-classes")
+@Mojo(name = PurgeAnnoRefsMojo.PAR, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class PurgeAnnoRefsMojo extends AbstractMojo {
 
-	public static class RemoveFrom {
-		private boolean types;
-		private boolean constructors;
-		private boolean fields;
-		private boolean methods;
-		private boolean parameters;
-	}
+	private static final Map<String, ElementType> mapping = unmodifiableMap(mapping());
 
-	@Parameter(property = "project", required = true, readonly = true)
+	protected static final String PAR = "par";
+
+	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	private MavenProject project;
 
-	@Parameter(property = "regexp", required = true)
-	private String toRemove;
-
-	@Parameter(property = "removeFrom")
-	private RemoveFrom removeFrom;
-
-	@Parameter(property = "dir", defaultValue = "${project.build.outputDirectory}")
-	private String dir;
+	@Parameter(property = PAR + ".removes", required = true)
+	private Remove[] removes;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		AnnotationReferenceRemover remover = getConfigured();
-		for (File file : collectFiles(new File(this.dir))) {
+		for (File file : collectFiles(new File(project.getBuild()
+				.getOutputDirectory()))) {
 			enhanceClass(remover, file);
 		}
 	}
@@ -73,7 +70,7 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
 	}
 
 	private void replace(File file, byte[] content) throws IOException {
-		FileOutputStream stream = new FileOutputStream(file);
+		FileOutputStream stream = new FileOutputStream(file, false);
 		try {
 			stream.write(content);
 		} finally {
@@ -83,45 +80,54 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
 
 	private AnnotationReferenceRemover getConfigured() {
 		AnnotationReferenceRemover remover = new AnnotationReferenceRemover();
-		Matcher<String> matcher = new RegExpMatcher(
-				Pattern.compile(this.toRemove));
-		if (this.removeFrom == null) {
-			remover.remove(matcher);
-		} else {
-			for (ElementType elementType : configToTypes(this.removeFrom)) {
-				remover.removeFrom(elementType, matcher);
+		for (Remove remove : removes) {
+			Matcher<String> matcher = new RegExpMatcher(
+					Pattern.compile(remove.regexp));
+			if (remove.removeFroms == null) {
+				remover.remove(matcher);
+			} else {
+				for (ElementType elementType : configToTypes(remove.removeFroms)) {
+					remover.removeFrom(elementType, matcher);
+				}
 			}
 		}
 		return remover;
 	}
 
-	private static Collection<ElementType> configToTypes(RemoveFrom removeFrom) {
-		List<ElementType> elements = new ArrayList<ElementType>();
-		if (removeFrom.types) {
-			elements.add(ElementType.TYPE);
-		}
-		if (removeFrom.fields) {
-			elements.add(ElementType.FIELD);
-		}
-		if (removeFrom.constructors) {
-			elements.add(ElementType.CONSTRUCTOR);
-		}
-		if (removeFrom.methods) {
-			elements.add(ElementType.METHOD);
-		}
-		if (removeFrom.parameters) {
-			elements.add(ElementType.PARAMETER);
+	private static Iterable<ElementType> configToTypes(String[] removeFroms) {
+		Set<ElementType> elements = new HashSet<ElementType>();
+		for (String removeFrom : removeFroms) {
+			ElementType elementType = mapping.get(removeFrom);
+			if (elementType == null) {
+				throw new IllegalStateException(removeFrom
+						+ " not a valid element type, supported types are "
+						+ mapping.keySet());
+			}
+			elements.add(elementType);
 		}
 		return elements;
 	}
 
-	private List<File> collectFiles(File root) {
-		List<File> files = new ArrayList<File>();
-		for (File file : root.listFiles()) {
+	private static Map<String, ElementType> mapping() {
+		Map<String, ElementType> mapping = new HashMap<String, ElementType>();
+		mapping.put("types", ElementType.TYPE);
+		mapping.put("fields", ElementType.FIELD);
+		mapping.put("constructors", ElementType.CONSTRUCTOR);
+		mapping.put("methods", ElementType.METHOD);
+		mapping.put("parameters", ElementType.PARAMETER);
+		return mapping;
+	}
+
+	private static List<File> collectFiles(File root) {
+		return collectTo(root, new ArrayList<File>(200));
+	}
+
+	private static List<File> collectTo(File baseDir, List<File> files) {
+		for (File file : baseDir.listFiles()) {
 			if (isClass(file)) {
 				files.add(file);
 			} else if (isDirectory(file)) {
-				files.addAll(collectFiles(file));
+				collectTo(file, files);
 			}
 		}
 		return files;
