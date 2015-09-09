@@ -94,7 +94,8 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
 		return remover;
 	}
 
-	private static Iterable<ElementType> configToTypes(String[] removeFroms) {
+	private static Iterable<ElementType> configToTypes(
+			Iterable<String> removeFroms) {
 		Set<ElementType> elements = new HashSet<ElementType>();
 		for (String removeFrom : removeFroms) {
 			ElementType elementType = mapping.get(removeFrom);
