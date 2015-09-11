@@ -12,12 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.ElementType;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -26,8 +22,8 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
+import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 import org.dyndns.fichtner.purgeannotationrefs.ant.types.AnnotationRemoveSelector;
-import org.dyndns.fichtner.purgeannotationrefs.ant.types.Target;
 import org.dyndns.fichtner.purgeannotationrefs.optimizer.ZipOptimizer;
 
 public class PurgeAnnotationRefsTask extends MatchingTask {
@@ -37,27 +33,6 @@ public class PurgeAnnotationRefsTask extends MatchingTask {
 	private boolean overwrite;
 
 	private final List<AnnotationRemoveSelector> selectors = new ArrayList<AnnotationRemoveSelector>();
-	private static final Map<Target, ElementType> MAP = Collections
-			.unmodifiableMap(createMap());
-
-	private static Map<Target, ElementType> createMap() {
-		final Map<Target, ElementType> map = new EnumMap<Target, ElementType>(
-				Target.class);
-		map.put(Target.TYPES, ElementType.TYPE);
-		map.put(Target.FIELDS, ElementType.FIELD);
-		map.put(Target.CONSTRUCTORS, ElementType.CONSTRUCTOR);
-		map.put(Target.METHODS, ElementType.METHOD);
-		return map;
-	}
-
-	private static ElementType getElementType(final Target target) {
-		final ElementType elementType = MAP.get(target);
-		if (elementType == null) {
-			throw new IllegalStateException(Target.class.getName()
-					+ " unknown type " + target); //$NON-NLS-1$
-		}
-		return elementType;
-	}
 
 	private static InputStream createInputStream(final File srcFile,
 			final boolean srcIsTarget) throws IOException,
@@ -161,22 +136,21 @@ public class PurgeAnnotationRefsTask extends MatchingTask {
 
 	private void configure(final AnnotationReferenceRemover remover) {
 		for (final AnnotationRemoveSelector annotationRemoveSelector : this.selectors) {
-			final Target target = annotationRemoveSelector.getFrom();
-			if (target == null) {
-				for (final ElementType elementType : ElementType.values()) {
-					configure(remover, annotationRemoveSelector, elementType);
+			final RemoveFrom removeFrom = annotationRemoveSelector.getFrom();
+			if (removeFrom == null) {
+				for (RemoveFrom tmp : RemoveFrom.values()) {
+					configure(remover, annotationRemoveSelector, tmp);
 				}
 			} else {
-				configure(remover, annotationRemoveSelector,
-						getElementType(target));
+				configure(remover, annotationRemoveSelector, removeFrom);
 			}
 		}
 	}
 
 	private void configure(final AnnotationReferenceRemover remover,
 			final AnnotationRemoveSelector annotationRemoveSelector,
-			final ElementType elementType) {
-		remover.removeFrom(elementType, annotationRemoveSelector.getMatcher());
+			final RemoveFrom removeFrom) {
+		remover.removeFrom(removeFrom, annotationRemoveSelector.getMatcher());
 	}
 
 	@Override
@@ -220,7 +194,7 @@ public class PurgeAnnotationRefsTask extends MatchingTask {
 		}
 		return classPath;
 	}
-	
+
 	public void setTargetDir(final File targetDir) {
 		this.targetDir = targetDir;
 	}

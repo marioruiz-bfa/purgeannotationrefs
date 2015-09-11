@@ -6,7 +6,8 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 /**
- * Class for removing annotations from methods.
+ * Adapter that delegates methods (no constructors) to the instance ClasVisitor
+ * passed in the constructor.
  * 
  * @author Peter Fichtner
  */
@@ -22,8 +23,8 @@ public class AnnotationMethodVisitor extends DefaultAnnotationMethodVisitor {
 	}
 
 	@Override
-	public MethodVisitor visitMethod(final int access, final String name,
-			final String desc, final String signature, final String[] exceptions) {
+	public MethodVisitor visitMethod(int access, String name, String desc,
+			String signature, String[] exceptions) {
 		return isMethod(name) ? super.visitMethod(access, name, desc,
 				signature, exceptions) : this.cv.visitMethod(access, name,
 				desc, signature, exceptions);

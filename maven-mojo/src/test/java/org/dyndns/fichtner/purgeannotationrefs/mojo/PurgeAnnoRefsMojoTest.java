@@ -1,16 +1,15 @@
 package org.dyndns.fichtner.purgeannotationrefs.mojo;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.CONSTRUCTORS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.FIELDS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.METHODS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.TYPES;
 import static org.dyndns.fichtner.purgeannotationrefs.mojo.FileUtilities.copy;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.ElementType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -21,10 +20,13 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 
 import org.apache.maven.model.Build;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.ProjectArtifact;
+import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Rule;
@@ -32,6 +34,8 @@ import org.junit.Test;
 import org.junit.internal.matchers.TypeSafeMatcher;
 
 public class PurgeAnnoRefsMojoTest {
+
+	private static final String EXAMPLE_CLASS = "org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleClass";
 
 	@Rule
 	public MojoRule rule = new MojoRule();
@@ -41,24 +45,8 @@ public class PurgeAnnoRefsMojoTest {
 
 	@Test
 	public void projectA_removeAll() throws Exception {
-		File targetDirectory = this.resources.getBasedir("project-A-removeAll");
-		File pom = new File(targetDirectory, "pom.xml");
-		assertTrue(pom.exists());
-
-		MavenProject prj = prj(pom);
-		File target = new File(
-				build(targetDirectory, prj).getOutputDirectory(), "classes");
-
-		copy(new File("../library/target/test-classes"), target);
-		assertAllAnnotationsArePresent(target);
-
-		PurgeAnnoRefsMojo mojo = (PurgeAnnoRefsMojo) this.rule.lookupMojo(
-				"par", pom);
-
-		this.rule.setVariableValueToObject(mojo, "project", prj);
-		mojo.execute();
-
-		Class<?> clazz = loadMyExampleClass(target);
+		File target = prepare("project-A-removeAll");
+		Class<?> clazz = loadClass(target, EXAMPLE_CLASS);
 		assertThat(clazz, hasNoAnno());
 		assertThat(annotatedField(clazz), hasNoAnno());
 		assertThat(intConstructor(clazz), hasNoAnno());
@@ -67,35 +55,29 @@ public class PurgeAnnoRefsMojoTest {
 
 	@Test
 	public void projectB_RemoveOnlyFromField() throws Exception {
-		File targetDirectory = this.resources
-				.getBasedir("project-B-removeFieldOnly");
-		File pom = new File(targetDirectory, "pom.xml");
-		assertTrue(pom.exists());
-
-		MavenProject prj = prj(pom);
-		File target = new File(
-				build(targetDirectory, prj).getOutputDirectory(), "classes");
-
-		copy(new File("../library/target/test-classes"), target);
-		assertAllAnnotationsArePresent(target);
-
-		PurgeAnnoRefsMojo mojo = (PurgeAnnoRefsMojo) this.rule.lookupMojo(
-				"par", pom);
-
-		this.rule.setVariableValueToObject(mojo, "project", prj);
-		mojo.execute();
-
-		Class<?> clazz = loadMyExampleClass(target);
-		assertThat(clazz, isAnnotated(TYPE));
+		File target = prepare("project-B-removeFieldOnly");
+		Class<?> clazz = loadClass(target, EXAMPLE_CLASS);
+		assertThat(clazz, isAnnotated(TYPES));
 		assertThat(annotatedField(clazz), hasNoAnno());
-		assertThat(intConstructor(clazz), isAnnotated(CONSTRUCTOR));
-		assertThat(foobarMethod(clazz), isAnnotated(METHOD));
+		assertThat(intConstructor(clazz), isAnnotated(CONSTRUCTORS));
+		assertThat(foobarMethod(clazz), isAnnotated(METHODS));
 	}
 
 	@Test
 	public void projectC_removeConstructorsAndMethods() throws Exception {
-		File targetDirectory = this.resources
-				.getBasedir("project-C-removeConstructorsAndMethods");
+		File target = prepare("project-C-removeConstructorsAndMethods");
+		Class<?> clazz = loadClass(target, EXAMPLE_CLASS);
+		assertThat(clazz, isAnnotated(TYPES));
+		assertThat(annotatedField(clazz), isAnnotated(FIELDS));
+		assertThat(intConstructor(clazz), hasNoAnno());
+		assertThat(foobarMethod(clazz), hasNoAnno());
+	}
+
+	private File prepare(String dir) throws IOException, MalformedURLException,
+			ClassNotFoundException, NoSuchFieldException,
+			NoSuchMethodException, Exception, IllegalAccessException,
+			MojoExecutionException, MojoFailureException {
+		File targetDirectory = this.resources.getBasedir(dir);
 		File pom = new File(targetDirectory, "pom.xml");
 		assertTrue(pom.exists());
 
@@ -111,22 +93,17 @@ public class PurgeAnnoRefsMojoTest {
 
 		this.rule.setVariableValueToObject(mojo, "project", prj);
 		mojo.execute();
-
-		Class<?> clazz = loadMyExampleClass(target);
-		assertThat(clazz, isAnnotated(TYPE));
-		assertThat(annotatedField(clazz), isAnnotated(FIELD));
-		assertThat(intConstructor(clazz), hasNoAnno());
-		assertThat(foobarMethod(clazz), hasNoAnno());
+		return target;
 	}
 
 	private void assertAllAnnotationsArePresent(File target)
 			throws MalformedURLException, ClassNotFoundException, IOException,
 			NoSuchFieldException, NoSuchMethodException {
-		Class<?> clazz = loadMyExampleClass(target);
-		assertThat(clazz, isAnnotated(TYPE));
-		assertThat(annotatedField(clazz), isAnnotated(FIELD));
-		assertThat(foobarMethod(clazz), isAnnotated(METHOD));
-		assertThat(intConstructor(clazz), isAnnotated(CONSTRUCTOR));
+		Class<?> clazz = loadClass(target, EXAMPLE_CLASS);
+		assertThat(clazz, isAnnotated(TYPES));
+		assertThat(annotatedField(clazz), isAnnotated(FIELDS));
+		assertThat(foobarMethod(clazz), isAnnotated(METHODS));
+		assertThat(intConstructor(clazz), isAnnotated(CONSTRUCTORS));
 	}
 
 	private Field annotatedField(Class<?> clazz) throws NoSuchFieldException {
@@ -155,32 +132,33 @@ public class PurgeAnnoRefsMojoTest {
 		};
 	}
 
-	private Matcher<AnnotatedElement> isAnnotated(final ElementType type) {
+	private Matcher<AnnotatedElement> isAnnotated(final RemoveFrom removeFrom) {
 		return new TypeSafeMatcher<AnnotatedElement>() {
 			public void describeTo(Description description) {
-				description.appendText("an element annotated with " + type);
+				description.appendText("an element annotated with "
+						+ removeFrom);
 			}
 
 			@Override
 			public boolean matchesSafely(AnnotatedElement annotatedElement) {
 				return Arrays.toString(annotatedElement.getAnnotations())
-						.equals(expected(type));
+						.equals(expected(removeFrom));
 			}
 
-			private String expected(final ElementType type) {
+			private String expected(final RemoveFrom removeFrom) {
 				return "[@org.dyndns.fichtner.purgeannotationrefs.testcode.MyAnno(value="
-						+ type + ")]";
+						+ removeFrom + ")]";
 			}
 		};
 	}
 
 	@SuppressWarnings("resource")
-	private Class<?> loadMyExampleClass(File classpath)
+	private Class<?> loadClass(File classpath, String classname)
 			throws MalformedURLException, ClassNotFoundException, IOException {
 		// do not close the classloader since annotations of the loaded class
 		// cannot be accessed otherwise!
 		return new URLClassLoader(new URL[] { classpath.toURI().toURL() })
-				.loadClass("org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleClass");
+				.loadClass(classname);
 	}
 
 	private MavenProject prj(File pom) {

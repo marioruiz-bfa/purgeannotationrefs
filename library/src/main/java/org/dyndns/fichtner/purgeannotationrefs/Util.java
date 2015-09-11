@@ -1,5 +1,6 @@
 package org.dyndns.fichtner.purgeannotationrefs;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Type;
 
 /**
@@ -84,14 +85,18 @@ public final class Util {
 	 * @param string the String to check
 	 * @return <code>true</code> if one of the matcher matches
 	 */
-	public static boolean atLeastOneMatches(final Iterable<Matcher<String>> matchers,
-			final String string) {
+	public static boolean atLeastOneMatches(
+			final Iterable<Matcher<String>> matchers, final String string) {
 		for (final Matcher<String> matcher : matchers) {
 			if (matcher.matches(string)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public static AnnotationVisitor annotationRemover() {
+		return null;
 	}
 
 }

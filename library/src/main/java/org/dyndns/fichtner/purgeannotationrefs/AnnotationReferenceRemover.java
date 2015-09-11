@@ -1,17 +1,15 @@
 package org.dyndns.fichtner.purgeannotationrefs;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.ElementType.TYPE;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.CONSTRUCTORS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.FIELDS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.METHODS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.PARAMETERS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.TYPES;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.annotation.ElementType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -23,8 +21,9 @@ import org.dyndns.fichtner.purgeannotationrefs.visitors.AnnotationConstructorVis
 import org.dyndns.fichtner.purgeannotationrefs.visitors.AnnotationFieldVisitor;
 import org.dyndns.fichtner.purgeannotationrefs.visitors.AnnotationMethodVisitor;
 import org.dyndns.fichtner.purgeannotationrefs.visitors.AnnotationParameterVisitor;
-import org.dyndns.fichtner.purgeannotationrefs.visitors.FilteringVisitor;
+import org.dyndns.fichtner.purgeannotationrefs.visitors.Filterable;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 /**
@@ -35,26 +34,22 @@ import org.objectweb.asm.ClassWriter;
  */
 public class AnnotationReferenceRemover implements ClassOptimizer {
 
-	private final static List<ElementType> supportedTypes = Collections
-			.unmodifiableList(Arrays.asList(TYPE, FIELD, CONSTRUCTOR, METHOD,
-					PARAMETER));
-
 	private static class Config {
 
-		private final EnumMap<ElementType, List<Matcher<String>>> map = new EnumMap<ElementType, List<Matcher<String>>>(
-				ElementType.class);
+		private final EnumMap<RemoveFrom, List<Matcher<String>>> map = new EnumMap<RemoveFrom, List<Matcher<String>>>(
+				RemoveFrom.class);
 
-		public void addFiltered(final ElementType key,
-				final Matcher<String> matcher) {
-			List<Matcher<String>> data = this.map.get(key);
+		public void addFiltered(RemoveFrom removeFrom, Matcher<String> matcher) {
+			List<Matcher<String>> data = this.map.get(removeFrom);
 			if (data == null) {
-				this.map.put(key, data = new ArrayList<Matcher<String>>());
+				this.map.put(removeFrom,
+						data = new ArrayList<Matcher<String>>());
 			}
 			data.add(matcher);
 		}
 
-		public List<Matcher<String>> getFiltered(final ElementType key) {
-			List<Matcher<String>> matchers = this.map.get(key);
+		public List<Matcher<String>> getFiltered(RemoveFrom removeFrom) {
+			List<Matcher<String>> matchers = this.map.get(removeFrom);
 			return matchers == null ? Collections.<Matcher<String>> emptyList()
 					: matchers;
 		}
@@ -85,7 +80,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 
 		private final int value;
 
-		private RewriteMode(final int value) {
+		private RewriteMode(int value) {
 			this.value = value;
 		}
 
@@ -119,9 +114,9 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @param matcher the annotation that should be removed
 	 * @return this instance
 	 */
-	public AnnotationReferenceRemover remove(final Matcher<String> matcher) {
-		for (ElementType elementType : supportedTypes) {
-			removeFrom(elementType, matcher);
+	public AnnotationReferenceRemover remove(Matcher<String> matcher) {
+		for (RemoveFrom removeFrom : RemoveFrom.values()) {
+			removeFrom(removeFrom, matcher);
 		}
 		return this;
 	}
@@ -133,12 +128,8 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * @param matcher the annotation that should be removed
 	 * @return this instance
 	 */
-	public AnnotationReferenceRemover removeFrom(final ElementType removeFrom,
-			final Matcher<String> matcher) {
-		if (!supportedTypes.contains(removeFrom)) {
-			throw new IllegalArgumentException(removeFrom
-					+ " not supported, supported types are " + supportedTypes);
-		}
+	public AnnotationReferenceRemover removeFrom(RemoveFrom removeFrom,
+			Matcher<String> matcher) {
 		this.config.addFiltered(removeFrom, matcher);
 		return this;
 	}
@@ -170,52 +161,46 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * 
 	 * @throws IOException on write errors
 	 */
-	public void optimize(final InputStream inputStream,
-			final OutputStream outputStream) throws IOException {
-		final ClassWriter classWriter = new ClassWriter(
-				ClassWriter.COMPUTE_MAXS);
+	public void optimize(InputStream inputStream, OutputStream outputStream)
+			throws IOException {
+		ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		new ClassReader(inputStream).accept(createVisitors(classWriter),
 				toInt(this.rewriteMode));
 		outputStream.write(classWriter.toByteArray());
 	}
 
-	private AnnotationParameterVisitor createVisitors(
-			final ClassWriter classWriter) {
+	private AnnotationParameterVisitor createVisitors(ClassWriter classWriter) {
 		return createParameterVisitor(createFieldVisitor(createMethodVisitor(createConstructorVisitor(createClassVisitor(classWriter)))));
 	}
 
 	private AnnotationParameterVisitor createParameterVisitor(
-			final AnnotationFieldVisitor fieldVisitor) {
-		return configure(new AnnotationParameterVisitor(fieldVisitor),
-				PARAMETER);
+			ClassVisitor classVisitor) {
+		return configure(new AnnotationParameterVisitor(classVisitor),
+				PARAMETERS);
 	}
 
-	private AnnotationFieldVisitor createFieldVisitor(
-			final AnnotationMethodVisitor methodVisitor) {
-		return configure(new AnnotationFieldVisitor(methodVisitor), FIELD);
+	private AnnotationFieldVisitor createFieldVisitor(ClassVisitor classVisitor) {
+		return configure(new AnnotationFieldVisitor(classVisitor), FIELDS);
 	}
 
 	private AnnotationMethodVisitor createMethodVisitor(
-			final AnnotationConstructorVisitor constructorVisitor) {
-		return configure(new AnnotationMethodVisitor(constructorVisitor),
-				METHOD);
+			ClassVisitor classVisitor) {
+		return configure(new AnnotationMethodVisitor(classVisitor), METHODS);
 	}
 
 	private AnnotationConstructorVisitor createConstructorVisitor(
-			final AnnotationClassVisitor classVisitor) {
+			ClassVisitor classVisitor) {
 		return configure(new AnnotationConstructorVisitor(classVisitor),
-				CONSTRUCTOR);
+				CONSTRUCTORS);
 	}
 
-	private AnnotationClassVisitor createClassVisitor(
-			final ClassWriter classWriter) {
-		return configure(new AnnotationClassVisitor(classWriter), TYPE);
+	private AnnotationClassVisitor createClassVisitor(ClassVisitor classVisitor) {
+		return configure(new AnnotationClassVisitor(classVisitor), TYPES);
 	}
 
-	private <T extends FilteringVisitor> T configure(final T filteringVisitor,
-			final ElementType removeFrom) {
-		for (final Matcher<String> matcher : this.config
-				.getFiltered(removeFrom)) {
+	private <T extends Filterable> T configure(T filteringVisitor,
+			RemoveFrom removeFrom) {
+		for (Matcher<String> matcher : this.config.getFiltered(removeFrom)) {
 			filteringVisitor.addFiltered(matcher);
 		}
 		return filteringVisitor;

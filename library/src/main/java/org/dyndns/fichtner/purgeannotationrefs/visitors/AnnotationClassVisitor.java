@@ -1,5 +1,6 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
+import static org.dyndns.fichtner.purgeannotationrefs.Util.annotationRemover;
 import static org.dyndns.fichtner.purgeannotationrefs.Util.atLeastOneMatches;
 import static org.dyndns.fichtner.purgeannotationrefs.Util.typeToClassname;
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -16,8 +17,7 @@ import org.objectweb.asm.ClassVisitor;
  * 
  * @author Peter Fichtner
  */
-public class AnnotationClassVisitor extends ClassVisitor implements
-		FilteringVisitor {
+public class AnnotationClassVisitor extends ClassVisitor implements Filterable {
 
 	private final List<Matcher<String>> filtered = new ArrayList<Matcher<String>>();
 
@@ -26,7 +26,7 @@ public class AnnotationClassVisitor extends ClassVisitor implements
 	 * 
 	 * @param classVisitor delegate visitor
 	 */
-	public AnnotationClassVisitor(final ClassVisitor classVisitor) {
+	public AnnotationClassVisitor(ClassVisitor classVisitor) {
 		super(ASM5, classVisitor);
 	}
 
@@ -35,15 +35,18 @@ public class AnnotationClassVisitor extends ClassVisitor implements
 	 * 
 	 * @param matcher the annotation to filter
 	 */
-	public void addFiltered(final Matcher<String> matcher) {
+	public void addFiltered(Matcher<String> matcher) {
 		this.filtered.add(matcher);
 	}
 
 	@Override
-	public AnnotationVisitor visitAnnotation(final String desc,
-			final boolean visible) {
-		return atLeastOneMatches(this.filtered, typeToClassname(desc)) ? null
-				: super.visitAnnotation(desc, visible);
+	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+		return matches(desc) ? annotationRemover() : super.visitAnnotation(
+				desc, visible);
+	}
+
+	private boolean matches(String desc) {
+		return atLeastOneMatches(this.filtered, typeToClassname(desc));
 	}
 
 }

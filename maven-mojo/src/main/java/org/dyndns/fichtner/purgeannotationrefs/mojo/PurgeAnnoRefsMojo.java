@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +26,7 @@ import org.apache.maven.project.MavenProject;
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.RegExpMatcher;
+import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 
 /**
  * Removes annotation references from classfiles.
@@ -34,7 +34,7 @@ import org.dyndns.fichtner.purgeannotationrefs.Matcher.RegExpMatcher;
 @Mojo(name = PurgeAnnoRefsMojo.PAR, defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class PurgeAnnoRefsMojo extends AbstractMojo {
 
-	private static final Map<String, ElementType> mapping = unmodifiableMap(mapping());
+	private static final Map<String, RemoveFrom> mapping = unmodifiableMap(mapping());
 
 	protected static final String PAR = "par";
 
@@ -86,36 +86,33 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
 			if (remove.removeFroms == null) {
 				remover.remove(matcher);
 			} else {
-				for (ElementType elementType : configToTypes(remove.removeFroms)) {
-					remover.removeFrom(elementType, matcher);
+				for (RemoveFrom removeFrom : configToTarget(remove.removeFroms)) {
+					remover.removeFrom(removeFrom, matcher);
 				}
 			}
 		}
 		return remover;
 	}
 
-	private static Iterable<ElementType> configToTypes(
-			Iterable<String> removeFroms) {
-		Set<ElementType> elements = new HashSet<ElementType>();
-		for (String removeFrom : removeFroms) {
-			ElementType elementType = mapping.get(removeFrom);
+	private static Iterable<RemoveFrom> configToTarget(Iterable<String> strings) {
+		Set<RemoveFrom> removeFroms = new HashSet<RemoveFrom>();
+		for (String removeFrom : strings) {
+			RemoveFrom elementType = mapping.get(removeFrom);
 			if (elementType == null) {
 				throw new IllegalStateException(removeFrom
 						+ " not a valid element type, supported types are "
 						+ mapping.keySet());
 			}
-			elements.add(elementType);
+			removeFroms.add(elementType);
 		}
-		return elements;
+		return removeFroms;
 	}
 
-	private static Map<String, ElementType> mapping() {
-		Map<String, ElementType> mapping = new HashMap<String, ElementType>();
-		mapping.put("types", ElementType.TYPE);
-		mapping.put("fields", ElementType.FIELD);
-		mapping.put("constructors", ElementType.CONSTRUCTOR);
-		mapping.put("methods", ElementType.METHOD);
-		mapping.put("parameters", ElementType.PARAMETER);
+	private static Map<String, RemoveFrom> mapping() {
+		Map<String, RemoveFrom> mapping = new HashMap<String, RemoveFrom>();
+		for (RemoveFrom removeFrom : RemoveFrom.values()) {
+			mapping.put(removeFrom.name().toLowerCase(), removeFrom);
+		}
 		return mapping;
 	}
 

@@ -6,7 +6,8 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 /**
- * Class for removing annotations from methods.
+ * Adapter that delegates constructors (no methods ) to the instance ClasVisitor
+ * passed in the constructor.
  * 
  * @author Peter Fichtner
  */

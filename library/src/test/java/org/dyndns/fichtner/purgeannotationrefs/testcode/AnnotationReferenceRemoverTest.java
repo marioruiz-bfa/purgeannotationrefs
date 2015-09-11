@@ -1,7 +1,6 @@
 package org.dyndns.fichtner.purgeannotationrefs.testcode;
 
-import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
-import static java.lang.annotation.ElementType.TYPE;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.TYPES;
 
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher;
@@ -12,13 +11,7 @@ public class AnnotationReferenceRemoverTest {
 
 	@Test
 	public void typeIsSupported() {
-		new AnnotationReferenceRemover().removeFrom(TYPE, anyMatcher());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void localVariableNotSupported() {
-		new AnnotationReferenceRemover().removeFrom(LOCAL_VARIABLE,
-				anyMatcher());
+		new AnnotationReferenceRemover().removeFrom(TYPES, anyMatcher());
 	}
 
 	private Matcher<String> anyMatcher() {

@@ -5,6 +5,11 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.CONSTRUCTORS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.FIELDS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.METHODS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.PARAMETERS;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.TYPES;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,17 +20,18 @@ import java.util.Arrays;
 
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
+import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 import org.dyndns.fichtner.purgeannotationrefs.testcode.MyAnno;
 
-@MyAnno(ElementType.TYPE)
+@MyAnno(TYPES)
 public class ExampleClass {
 
 	private String field = "ok1";
 
-	@MyAnno(FIELD)
+	@MyAnno(FIELDS)
 	private String annotatedField = "ok2";
 
-	@MyAnno(CONSTRUCTOR)
+	@MyAnno(CONSTRUCTORS)
 	public ExampleClass(int bar) {
 		super();
 	}
@@ -36,9 +42,6 @@ public class ExampleClass {
 
 	public static void main(String[] args) throws IOException,
 			SecurityException, NoSuchMethodException, NoSuchFieldException {
-		// Local variable annotations are not retained in class files (JLS
-		// 9.6.1.2)
-		@MyAnno(LOCAL_VARIABLE)
 		int v = 9;
 		new ExampleClass(7).foobar(v);
 
@@ -57,8 +60,8 @@ public class ExampleClass {
 		System.out.println(Arrays.toString(outputStream.toByteArray()));
 	}
 
-	@MyAnno(METHOD)
-	private void foobar(@MyAnno(PARAMETER) int foo) throws SecurityException,
+	@MyAnno(METHODS)
+	private void foobar(@MyAnno(PARAMETERS) int foo) throws SecurityException,
 			NoSuchMethodException, NoSuchFieldException {
 		System.out.println("class "
 				+ Arrays.toString(ExampleClass.class.getAnnotations()));

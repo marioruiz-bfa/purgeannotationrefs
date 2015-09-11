@@ -7,16 +7,18 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.METHODS;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 
 @Target({ TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE })
 @Retention(RUNTIME)
 public @interface MyAnno {
 
-	@MyAnno(METHOD)
-	ElementType value();
+	@MyAnno(METHODS)
+	RemoveFrom value();
 
 }
