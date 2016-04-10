@@ -1,4 +1,4 @@
-# purgeannotationrefs [![Build Status](https://buildhive.cloudbees.com/job/pfichtner/job/purgeannotationrefs/badge/icon)](https://buildhive.cloudbees.com/job/pfichtner/job/purgeannotationrefs/)
+# purgeannotationrefs [![Build Status](https://travis-ci.org/pfichtner/purgeannotationrefs.svg?branch=master)](https://travis-ci.org/pfichtner/purgeannotationrefs)
 
 Remove references to annotations out of the java bytecode/classfiles (remove the @Anno tag from annotated elements). 
 Now you can use annotations to check constellations in bytecode after compilation but purge the used annotations before releasing the jars.
