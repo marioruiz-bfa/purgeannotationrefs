@@ -65,16 +65,16 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 */
 	public static enum RewriteMode {
 		/**
-		 * @see ClassReader.EXPAND_FRAMES
+		 * @see ClassReader#EXPAND_FRAMES
 		 */
 		EXPAND_FRAMES(ClassReader.EXPAND_FRAMES), /**
-		 * @see ClassReader.SKIP_CODE
+		 * @see ClassReader#SKIP_CODE
 		 */
 		SKIP_CODE(ClassReader.SKIP_CODE), /**
-		 * @see ClassReader.SKIP_DEBUG
+		 * @see ClassReader#SKIP_DEBUG
 		 */
 		SKIP_DEBUG(ClassReader.SKIP_DEBUG), /**
-		 * @see ClassReader.SKIP_FRAMES
+		 * @see ClassReader#SKIP_FRAMES
 		 */
 		SKIP_FRAMES(ClassReader.SKIP_FRAMES);
 
@@ -100,8 +100,6 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	/**
 	 * Creates a new instance for the passed class (.class-file/bytecode). This
 	 * class must be readable.
-	 * 
-	 * @param classfile path to the classfile
 	 */
 	public AnnotationReferenceRemover() {
 		super();
@@ -156,8 +154,6 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 	 * 
 	 * @param inputStream the stream to read from
 	 * @param outputStream the stream to write to
-	 * 
-	 * @param classfile the classfile to read and write
 	 * 
 	 * @throws IOException on write errors
 	 */

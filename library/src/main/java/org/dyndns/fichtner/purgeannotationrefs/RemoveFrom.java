@@ -6,13 +6,12 @@ import java.lang.annotation.ElementType;
  * Specify the elements the annotations should be removed from. At the moment
  * supported types are:
  * <ol>
- * <li>{@value #TYPES}</li>
- * <li>{@value #FIELDS}</li>
- * <li>{@value #CONSTRUCTORS}</li>
- * <li>{@value #METHODS}</li>
- * <li>{@value #PARAMETERS}</li>
+ * <li>{@link RemoveFrom#TYPES}</li>
+ * <li>{@link RemoveFrom#FIELDS}</li>
+ * <li>{@link RemoveFrom#CONSTRUCTORS}</li>
+ * <li>{@link RemoveFrom#METHODS}</li>
+ * <li>{@link RemoveFrom#PARAMETERS}</li>
  * </ol>
- * <br/>
  * Local variables are not supported since they are not retained in java
  * bytecode (class files), see <a href=
  * "https://docs.oracle.com/javase/specs/jls/se6/html/interfaces.html#9.6.1.2"
