@@ -8,6 +8,13 @@
 		<version>0.3.6-SNAPSHOT</version>
 	</parent>
 
+        <licenses>
+            <license>
+                <name>GNU Lesser General Public License (LGPL3)</name>
+                <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
+            </license>
+        </licenses>
+
 	<build>
 		<plugins>
 			<plugin>

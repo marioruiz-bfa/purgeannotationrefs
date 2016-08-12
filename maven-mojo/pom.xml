@@ -9,6 +9,13 @@
 		<version>0.3.6-SNAPSHOT</version>
 	</parent>
 
+        <licenses>
+            <license>
+                <name>GNU Lesser General Public License (LGPL3)</name>
+                <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
+            </license>
+        </licenses>
+
 	<properties>
 		<maven.version>3.2.2</maven.version>
 	</properties>
