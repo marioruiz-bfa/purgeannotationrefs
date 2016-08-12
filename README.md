@@ -10,4 +10,4 @@ There are three modules:
 
 ## License
 
-Copyright 2008-2015 Peter Fichtner - Released under the [ GNU Lesser General Public License ](http://www.gnu.de/documents/lgpl-3.0.de.html)
+Copyright 2008-2015 Peter Fichtner - Released under the [ GNU Lesser General Public License ](https://www.gnu.org/licenses/lgpl-3.0.html)

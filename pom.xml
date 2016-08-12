@@ -10,7 +10,14 @@
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<junit.version>4.12</junit.version>
 	</properties>
-
+        
+        <licenses>
+            <license>
+                <name>GNU Lesser General Public License (LGPL3)</name>
+                <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
+            </license>
+        </licenses>
+        
 	<modules>
 		<module>library</module>
 		<module>anttask</module>
