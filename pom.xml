@@ -39,6 +39,14 @@
 		</license>
 	</licenses>
 
+	<distributionManagement>
+		<repository>
+			<id>bintray-pfichtner-maven2</id>
+			<name>pfichtner-maven2</name>
+			<url>https://api.bintray.com/maven/pfichtner/maven2/purgeannotationrefs/;publish=1</url>
+		</repository>
+	</distributionManagement>
+
 	<modules>
 		<module>library</module>
 		<module>anttask</module>
