@@ -1,41 +1,46 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>maven-mojo</artifactId>
-	<packaging>maven-plugin</packaging>
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.dyndns.fichtner.purgeannotationrefs</groupId>
 		<artifactId>parent</artifactId>
 		<version>0.3.7-SNAPSHOT</version>
+		<relativePath>../</relativePath>
 	</parent>
 
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>maven-mojo</artifactId>
+	<packaging>maven-plugin</packaging>
+	<name>Maven-Mojo</name>
+	<description />
+
 	<properties>
-		<maven.version>3.2.2</maven.version>
+		<maven.version>3.6.3</maven.version>
+		<maven.plugin.annotations.version>3.6.0</maven.plugin.annotations.version>
 	</properties>
 
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.4</version>
+				<version>3.6.0</version>
 				<configuration>
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 				</configuration>
 				<executions>
 					<execution>
 						<id>default-descriptor</id>
-						<phase>process-classes</phase>
 						<goals>
 							<goal>descriptor</goal>
 						</goals>
+						<phase>process-classes</phase>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.3</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -59,54 +64,64 @@
 		<dependency>
 			<groupId>org.dyndns.fichtner.purgeannotationrefs</groupId>
 			<artifactId>library</artifactId>
-			<version>0.3.7-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
 			<version>${maven.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
 			<version>${maven.version}</version>
-			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.maven</groupId>
+					<artifactId>maven-resolver-provider</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-compat</artifactId>
+			<version>${maven.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.maven</groupId>
+					<artifactId>maven-resolver-provider</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>${maven.plugin.annotations.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-model</artifactId>
 			<version>${maven.version}</version>
-			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.maven.plugin-tools</groupId>
-			<artifactId>maven-plugin-annotations</artifactId>
-			<version>3.4</version>
-			<scope>provided</scope>
-		</dependency>
-
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- THIS is the important part -->
 		<dependency>
 			<groupId>org.apache.maven.plugin-testing</groupId>
 			<artifactId>maven-plugin-testing-harness</artifactId>
-			<version>3.2.0</version>
+			<version>3.3.0</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-aether-provider</artifactId>
-			<version>${maven.version}</version>
+			<version>3.3.9</version>
 			<scope>test</scope>
 		</dependency>
 

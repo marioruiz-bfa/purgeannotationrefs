@@ -294,7 +294,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
 				this.pw.print("\"");
 			}
 			if (fn.value instanceof String) {
-				StringBuffer buf = new StringBuffer();
+				StringBuilder buf = new StringBuilder();
 				Printer.appendString(buf, (String) fn.value);
 				this.pw.print(" = ");
 				this.pw.print(buf.toString());
@@ -670,7 +670,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
 
 	protected void print(final Object cst) {
 		if (cst instanceof String) {
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			Printer.appendString(buf, (String) cst);
 			this.pw.print(buf.toString());
 		} else if (cst instanceof Float) {

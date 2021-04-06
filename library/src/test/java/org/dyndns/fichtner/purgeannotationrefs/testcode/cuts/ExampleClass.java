@@ -1,10 +1,5 @@
 package org.dyndns.fichtner.purgeannotationrefs.testcode.cuts;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.CONSTRUCTORS;
 import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.FIELDS;
 import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.METHODS;
@@ -15,12 +10,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.ElementType;
 import java.util.Arrays;
 
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
-import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 import org.dyndns.fichtner.purgeannotationrefs.testcode.MyAnno;
 
 @MyAnno(TYPES)
