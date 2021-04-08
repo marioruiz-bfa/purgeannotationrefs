@@ -32,7 +32,7 @@ public class TestExampleClass {
 
 	@Test
 	public void checkOriginalClassHas5Annotations() throws IOException {
-		String[] dump = classToJasmin(ExampleClass.class).split("\\n");
+		String[] dump = classToJasmin(ExampleClass.class).split("(\\r\\n|\\r|\\n)");
 		assertAnnoCountIs(5, dump);
 		assertThat(count(dump, isAnno(annoClazz), TYPES), is(1));
 		assertThat(count(dump, isAnno(annoClazz), FIELDS), is(1));
@@ -50,7 +50,7 @@ public class TestExampleClass {
 				new AnnotationReferenceRemover().remove(new StringMatcher(
 						annoClazz.getName()))));
 		try {
-			assertAnnoCountIs(0, streamToJasmin(is).split("\\n"));
+			assertAnnoCountIs(0, streamToJasmin(is).split("(\\r\\n|\\r|\\n)"));
 		} finally {
 			is.close();
 		}
@@ -82,7 +82,7 @@ public class TestExampleClass {
 				new AnnotationReferenceRemover().removeFrom(removeFrom,
 						new StringMatcher(annoClazz.getName()))));
 		try {
-			String[] dump = streamToJasmin(is).split("\\n");
+			String[] dump = streamToJasmin(is).split("(\\r\\n|\\r|\\n)");
 			assertCount(removeFrom, dump, TYPES);
 			assertCount(removeFrom, dump, FIELDS);
 			assertCount(removeFrom, dump, CONSTRUCTORS);
