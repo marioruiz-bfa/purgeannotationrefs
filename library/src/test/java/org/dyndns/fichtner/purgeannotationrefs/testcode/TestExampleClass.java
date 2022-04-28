@@ -1,155 +1,142 @@
 package org.dyndns.fichtner.purgeannotationrefs.testcode;
 
-import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.CONSTRUCTORS;
-import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.FIELDS;
-import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.METHODS;
-import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.PARAMETERS;
-import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.TYPES;
-import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.TestHelper.removeAnno;
-import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.jasmin.JasminUtil.classToJasmin;
-import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.jasmin.JasminUtil.streamToJasmin;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
+import org.dyndns.fichtner.purgeannotationrefs.Matcher;
+import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
+import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
+import org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleClass;
+import org.junit.jupiter.api.Test;
+import org.objectweb.asm.Type;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
-import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
-import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
-import org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleClass;
-import org.hamcrest.Matcher;
-import org.junit.Test;
-import org.objectweb.asm.Type;
+import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.*;
+import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.TestHelper.removeAnno;
+import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.jasmin.JasminUtil.classToJasmin;
+import static org.dyndns.fichtner.purgeannotationrefs.testcode.util.jasmin.JasminUtil.streamToJasmin;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class TestExampleClass {
 
-	private final static Class<MyAnno> annoClazz = MyAnno.class;
+  private final static Class<MyAnno> annoClazz = MyAnno.class;
 
-	@Test
-	public void checkOriginalClassHas5Annotations() throws IOException {
-		String[] dump = classToJasmin(ExampleClass.class).split("(\\r\\n|\\r|\\n)");
-		assertAnnoCountIs(5, dump);
-		assertThat(count(dump, isAnno(annoClazz), TYPES), is(1));
-		assertThat(count(dump, isAnno(annoClazz), FIELDS), is(1));
-		assertThat(count(dump, isAnno(annoClazz), CONSTRUCTORS), is(1));
-		assertThat(count(dump, isAnno(annoClazz), METHODS), is(1));
-		assertThat(count(dump, isAnno(annoClazz), PARAMETERS), is(1));
-		// assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLES), is(0));
-	}
+  private static StringMatcher isAnno(Class<MyAnno> clazz) {
+    return new StringMatcher(".annotation" + " " + "visible" + " "
+        + Type.getType(clazz).getDescriptor());
+  }
 
-	@Test
-	public void whenRemovingAllRefsTheAnnotationIsNotFoundAtAll()
-			throws IOException {
-		ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
-				ExampleClass.class,
-				new AnnotationReferenceRemover().remove(new StringMatcher(
-						annoClazz.getName()))));
-		try {
-			assertAnnoCountIs(0, streamToJasmin(is).split("(\\r\\n|\\r|\\n)"));
-		} finally {
-			is.close();
-		}
-	}
+  private static int count(String[] lines, StringMatcher matcher) {
+    int cnt = 0;
+    for (String line : lines) {
+      if (matcher.matches(line)) {
+        cnt++;
+      }
 
-	@Test
-	public void removeFromTypeOnly() throws IOException {
-		removeOnlyType(TYPES);
-	}
+    }
+    return cnt;
+  }
 
-	@Test
-	public void removeFromMethodOnly() throws IOException {
-		removeOnlyType(METHODS);
-	}
+  @Test
+  public void checkOriginalClassHas5Annotations() throws IOException {
+    String[] dump = classToJasmin(ExampleClass.class).split("(\\r\\n|\\r|\\n)");
+    assertAnnoCountIs(5, dump);
+    assertEquals(1, count(dump, isAnno(annoClazz), TYPES));
+    assertEquals(1, count(dump, isAnno(annoClazz), FIELDS));
+    assertEquals(1, count(dump, isAnno(annoClazz), CONSTRUCTORS));
+    assertEquals(1, count(dump, isAnno(annoClazz), METHODS));
+    assertEquals(1, count(dump, isAnno(annoClazz), PARAMETERS));
+    // assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLES), is(0));
+  }
 
-	@Test
-	public void removeFromConstructorOnly() throws IOException {
-		removeOnlyType(CONSTRUCTORS);
-	}
+  @Test
+  public void whenRemovingAllRefsTheAnnotationIsNotFoundAtAll()
+      throws IOException {
+    try (ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
+        ExampleClass.class,
+        new AnnotationReferenceRemover().remove(new StringMatcher(
+            annoClazz.getName()))))) {
+      assertAnnoCountIs(0, streamToJasmin(is).split("(\\r\\n|\\r|\\n)"));
+    }
+  }
 
-	@Test
-	public void removeFromFieldOnly() throws IOException {
-		removeOnlyType(FIELDS);
-	}
+  @Test
+  public void removeFromTypeOnly() throws IOException {
+    removeOnlyType(TYPES);
+  }
 
-	private void removeOnlyType(RemoveFrom removeFrom) throws IOException {
-		ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
-				ExampleClass.class,
-				new AnnotationReferenceRemover().removeFrom(removeFrom,
-						new StringMatcher(annoClazz.getName()))));
-		try {
-			String[] dump = streamToJasmin(is).split("(\\r\\n|\\r|\\n)");
-			assertCount(removeFrom, dump, TYPES);
-			assertCount(removeFrom, dump, FIELDS);
-			assertCount(removeFrom, dump, CONSTRUCTORS);
-			assertCount(removeFrom, dump, METHODS);
-			assertCount(removeFrom, dump, PARAMETERS);
-			// Local variable annotations are not retained in class files (JLS
-			// 9.6.1.2)
-			// assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLE),
-			// is(0));
+  @Test
+  public void removeFromMethodOnly() throws IOException {
+    removeOnlyType(METHODS);
+  }
 
-		} finally {
-			is.close();
-		}
-	}
+  @Test
+  public void removeFromConstructorOnly() throws IOException {
+    removeOnlyType(CONSTRUCTORS);
+  }
 
-	private void assertCount(RemoveFrom removeFrom, String[] dump,
-			RemoveFrom elementToCount) {
-		assertThat(count(dump, isAnno(annoClazz), elementToCount),
-				is(removeFrom == elementToCount ? 0 : 1));
-	}
+  @Test
+  public void removeFromFieldOnly() throws IOException {
+    removeOnlyType(FIELDS);
+  }
 
-	private int count(String[] lines, Matcher<String> matcher,
-			RemoveFrom removeFrom) {
-		Type valueType = Type.getType(getType(MyAnno.class, "value"));
-		int cnt = 0;
-		for (Iterator<String> iterator = Arrays.asList(lines).iterator(); iterator
-				.hasNext();) {
-			String line = iterator.next();
-			if (matcher.matches(line)
-					&& iterator.hasNext()
-					&& ("value e " + valueType.getDescriptor() + " = \""
-							+ removeFrom + "\"").equals(iterator.next())) {
-				cnt++;
-			}
+  private void removeOnlyType(RemoveFrom removeFrom) throws IOException {
+    try (ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
+        ExampleClass.class,
+        new AnnotationReferenceRemover().removeFrom(removeFrom,
+            new StringMatcher(annoClazz.getName()))))) {
+      String[] dump = streamToJasmin(is).split("(\\r\\n|\\r|\\n)");
+      assertCount(removeFrom, dump, TYPES);
+      assertCount(removeFrom, dump, FIELDS);
+      assertCount(removeFrom, dump, CONSTRUCTORS);
+      assertCount(removeFrom, dump, METHODS);
+      assertCount(removeFrom, dump, PARAMETERS);
+      // Local variable annotations are not retained in class files (JLS
+      // 9.6.1.2)
+      // assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLE),
+      // is(0));
 
-		}
-		return cnt;
-	}
+    }
+  }
 
-	private Class<?> getType(Class<? extends Annotation> annoClass, String field) {
-		try {
-			return annoClass.getDeclaredMethod(field).getReturnType();
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		}
-	}
+  private void assertCount(RemoveFrom removeFrom, String[] dump,
+                           RemoveFrom elementToCount) {
+    assertEquals(removeFrom == elementToCount ? 0 : 1, count(dump, isAnno(annoClazz), elementToCount));
+  }
 
-	private void assertAnnoCountIs(int count, String[] s) {
-		assertThat(count(s, isAnno(annoClazz)), is(count));
-	}
+  private int count(String[] lines, Matcher<String> matcher,
+                    RemoveFrom removeFrom) {
+    Type valueType = Type.getType(getType(MyAnno.class, "value"));
+    int cnt = 0;
 
-	private static Matcher<String> isAnno(Class<MyAnno> clazz) {
-		return is(".annotation" + " " + "visible" + " "
-				+ Type.getType(clazz).getDescriptor());
-	}
+    for (Iterator<String> iterator = Arrays.asList(lines).iterator(); iterator
+        .hasNext(); ) {
+      String line = iterator.next();
+      if (matcher.matches(line)
+          && iterator.hasNext()
+          && ("value e " + valueType.getDescriptor() + " = \""
+          + removeFrom + "\"").equals(iterator.next())) {
+        cnt++;
+      }
 
-	private static int count(String[] lines, Matcher<String> matcher) {
-		int cnt = 0;
-		for (String line : lines) {
-			if (matcher.matches(line)) {
-				cnt++;
-			}
+    }
+    return cnt;
+  }
 
-		}
-		return cnt;
-	}
+  private Class<?> getType(Class<? extends Annotation> annoClass, String field) {
+    try {
+      return annoClass.getDeclaredMethod(field).getReturnType();
+    } catch (NoSuchMethodException | SecurityException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void assertAnnoCountIs(int count, String[] s) {
+    assertEquals(count, count(s, isAnno(annoClazz)));
+  }
 
 }

@@ -8,56 +8,61 @@ import java.nio.channels.FileChannel;
 
 public class FileUtilities {
 
-	private FileUtilities() {
-		super();
-	}
+  private FileUtilities() {
+    super();
+  }
 
-	public static final void copy(File source, File destination)
-			throws IOException {
-		if (source.isDirectory()) {
-			copyDirectory(source, destination);
-		} else {
-			copyFile(source, destination);
-		}
-	}
+  public static void copy(File source, File destination)
+      throws IOException {
+    if (source.isDirectory()) {
+      copyDirectory(source, destination);
+    } else {
+      copyFile(source, destination);
+    }
+  }
 
-	public static final void copyDirectory(File source, File destination)
-			throws IOException {
-		if (!source.isDirectory()) {
-			throw new IllegalArgumentException("Source (" + source.getPath()
-					+ ") must be a directory.");
-		}
+  public static void copyDirectory(File source, File destination)
+      throws IOException {
+    if (!source.isDirectory()) {
+      throw new IllegalArgumentException("Source (" + source.getPath()
+          + ") must be a directory.");
+    }
 
-		if (!source.exists()) {
-			throw new IllegalArgumentException("Source directory ("
-					+ source.getPath() + ") doesn't exist.");
-		}
+    if (!destination.isDirectory()) {
+      throw new IllegalArgumentException("Destination (" + destination.getPath()
+          + ") must be a directory.");
+    }
 
-		if (destination.exists()) {
-			throw new IllegalArgumentException("Destination ("
-					+ destination.getPath() + ") exists.");
-		}
+    if (!source.exists()) {
+      throw new IllegalArgumentException("Source directory ("
+          + source.getPath() + ") doesn't exist.");
+    }
 
-		destination.mkdirs();
-		File[] files = source.listFiles();
+    if (destination.exists()) {
+      throw new IllegalArgumentException("Destination ("
+          + destination.getPath() + ") exists.");
+    }
 
-		for (File file : files) {
-			if (file.isDirectory()) {
-				copyDirectory(file, new File(destination, file.getName()));
-			} else {
-				copyFile(file, new File(destination, file.getName()));
-			}
-		}
-	}
+    destination.mkdirs();
+    File[] files = source.listFiles();
 
-	public static final void copyFile(File source, File destination)
-			throws IOException {
-		FileChannel sourceChannel = new FileInputStream(source).getChannel();
-		FileChannel targetChannel = new FileOutputStream(destination)
-				.getChannel();
-		sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
-		sourceChannel.close();
-		targetChannel.close();
-	}
+    for (File file : files) {
+      if (file.isDirectory()) {
+        copyDirectory(file, new File(destination, file.getName()));
+      } else {
+        copyFile(file, new File(destination, file.getName()));
+      }
+    }
+  }
+
+  public static void copyFile(File source, File destination)
+      throws IOException {
+    try (FileChannel sourceChannel = new FileInputStream(source).getChannel()) {
+      try (FileChannel targetChannel = new FileOutputStream(destination)
+          .getChannel()) {
+        sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
+      }
+    }
+  }
 
 }
