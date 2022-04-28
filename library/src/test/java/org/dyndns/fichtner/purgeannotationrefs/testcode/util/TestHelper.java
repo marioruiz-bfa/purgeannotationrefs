@@ -12,7 +12,7 @@ public final class TestHelper {
   }
 
   public static byte[] writeClass(String filename, byte[] bytes)
-      throws FileNotFoundException, IOException {
+      throws IOException {
     try (FileOutputStream fos = new FileOutputStream(filename)) {
       fos.write(bytes);
     }

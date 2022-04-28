@@ -1,7 +1,6 @@
 package org.dyndns.fichtner.purgeannotationrefs.mojo.test;
 
 
-import com.google.inject.Module;
 import org.apache.commons.io.input.XmlStreamReader;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -30,7 +29,6 @@ import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluator
 import org.codehaus.plexus.component.repository.ComponentDescriptor;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.codehaus.plexus.lifecycle.LifecycleHandlerManager;
 import org.codehaus.plexus.logging.LoggerManager;
 import org.codehaus.plexus.util.InterpolationFilterReader;
 import org.codehaus.plexus.util.ReaderFactory;
@@ -56,7 +54,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
     DefaultArtifactVersion version = null;
     String path = "/META-INF/maven/org.apache.maven/maven-core/pom.properties";
 
-    try (InputStream is = GradleMojoTestCase.class.getResourceAsStream(path);) {
+    try (InputStream is = GradleMojoTestCase.class.getResourceAsStream(path)) {
       Properties properties = new Properties();
       if (is != null) {
         properties.load(is);
@@ -167,7 +165,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
 
   protected InputStream getPublicDescriptorStream()
       throws Exception {
-    return new FileInputStream(new File(getPluginDescriptorPath()));
+    return new FileInputStream(getPluginDescriptorPath());
   }
 
   protected String getPluginDescriptorPath() {
@@ -188,21 +186,12 @@ public class GradleMojoTestCase extends PlexusTestCase {
     }
   }
 
-  /**
-   * @since 3.0.0
-   */
-  protected void addGuiceModules(List<Module> modules) {
-    // no custom guice modules by default
-  }
-
   protected ContainerConfiguration setupContainerConfiguration() {
     ClassWorld classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
 
-    ContainerConfiguration cc = new DefaultContainerConfiguration()
+    return new DefaultContainerConfiguration()
         .setClassWorld(classWorld)
         .setName("maven");
-
-    return cc;
   }
 
   protected PlexusContainer getContainer() {
@@ -287,15 +276,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
     return lookupMojo(groupId, artifactId, version, goal, null);
   }
 
-    /*
-     protected Mojo lookupMojo( String groupId, String artifactId, String version, String goal, File pom )
-     throws Exception
-     {
-     PlexusConfiguration pluginConfiguration = extractPluginConfiguration( artifactId, pom );
 
-     return lookupMojo( groupId, artifactId, version, goal, pluginConfiguration );
-     }
-     */
 
   /**
    * lookup the mojo while we have all of the relavent information
@@ -315,9 +296,9 @@ public class GradleMojoTestCase extends PlexusTestCase {
 
     // pluginkey = groupId : artifactId : version : goal
 
-    Mojo mojo = (Mojo) lookup(Mojo.ROLE, groupId + ":" + artifactId + ":" + version + ":" + goal);
+    Mojo mojo = lookup(Mojo.ROLE, groupId + ":" + artifactId + ":" + version + ":" + goal);
 
-    LoggerManager loggerManager = (LoggerManager) getContainer().lookup(LoggerManager.class);
+    LoggerManager loggerManager = getContainer().lookup(LoggerManager.class);
 
     Log mojoLogger = new DefaultLog(loggerManager.getLoggerForComponent(Mojo.ROLE));
 
@@ -361,7 +342,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
     MavenProject project = session.getCurrentProject();
     MojoDescriptor mojoDescriptor = execution.getMojoDescriptor();
 
-    Mojo mojo = (Mojo) lookup(mojoDescriptor.getRole(), mojoDescriptor.getRoleHint());
+    Mojo mojo = lookup(mojoDescriptor.getRole(), mojoDescriptor.getRoleHint());
 
     ExpressionEvaluator evaluator = new PluginParameterExpressionEvaluator(session, execution);
 
@@ -397,7 +378,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
 
     MavenSession session = new MavenSession(container, MavenRepositorySystemUtils.newSession(), request, result);
     session.setCurrentProject(project);
-    session.setProjects(Arrays.asList(project));
+    session.setProjects(List.of(project));
     return session;
   }
 
@@ -424,7 +405,6 @@ public class GradleMojoTestCase extends PlexusTestCase {
     }
 
     Xpp3Dom defaultConfiguration = MojoDescriptorCreator.convert(mojoDescriptor);
-    ;
 
     Xpp3Dom finalConfiguration = new Xpp3Dom("configuration");
 
@@ -597,7 +577,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
    */
   protected Map<String, Object> getVariablesAndValuesFromObject(Class<?> clazz, Object object)
       throws IllegalAccessException {
-    Map<String, Object> map = new HashMap<String, Object>();
+    Map<String, Object> map = new HashMap<>();
 
     Field[] fields = clazz.getDeclaredFields();
 

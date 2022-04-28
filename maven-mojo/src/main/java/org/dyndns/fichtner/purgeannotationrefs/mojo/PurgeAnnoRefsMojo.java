@@ -38,7 +38,7 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
     return
         StreamSupport.stream(strings.spliterator(), false)
             .map(mapping::get)
-            .peek(it -> Objects.requireNonNull(it, () -> "supported types are " + mapping.keySet()))
+            .map(it -> Objects.requireNonNull(it, () -> "supported types are " + mapping.keySet()))
             .collect(Collectors.toSet());
 
   }

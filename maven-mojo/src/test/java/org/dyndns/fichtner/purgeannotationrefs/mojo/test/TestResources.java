@@ -19,9 +19,9 @@ package org.dyndns.fichtner.purgeannotationrefs.mojo.test;
  * under the License.
  */
 
-import junit.framework.Assert;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
+import org.junit.Assert;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -123,7 +125,7 @@ public class TestResources
   }
 
   public static void rm(File basedir, String path) {
-    Assert.assertTrue("delete " + path, new File(basedir, path).delete());
+    assertTrue("delete " + path, new File(basedir, path).delete());
   }
 
   /**
@@ -136,9 +138,9 @@ public class TestResources
     }
     for (String path : paths) {
       File file = new File(basedir, path);
-      Assert.assertTrue(file.getParentFile().mkdirs());
+      assertTrue(file.getParentFile().mkdirs());
       file.createNewFile();
-      Assert.assertTrue(file.isFile() && file.canRead());
+      assertTrue(file.isFile() && file.canRead());
     }
   }
 
@@ -155,16 +157,19 @@ public class TestResources
           + " must be a test class field annotated with org.junit.Rule");
     }
     File src = new File(projectsDir, project).getCanonicalFile();
-    Assert.assertTrue("Test project directory does not exist: " + src.getPath(), src.isDirectory());
+    assertTrue("Test project directory does not exist: " + src.getPath(), src.isDirectory());
     File basedir = new File(workDir, name + "_" + project).getCanonicalFile();
     FileUtils.deleteDirectory(basedir);
-    Assert.assertTrue("Test project working directory created", basedir.mkdirs());
+    assertTrue("Test project working directory created", basedir.mkdirs());
     FileUtils.copyDirectoryStructure(src, basedir);
     return basedir;
   }
 
   @Override
   public void beforeEach(ExtensionContext context) throws Exception {
-    name = context.getRequiredTestClass().getSimpleName() + '_' + context.getTestMethod().map(it -> it.getName().replace('/', '_').replace('\\', '_')).orElse("");
+    name = context.getRequiredTestClass().getSimpleName()
+        + '_' + context.getTestMethod()
+        .map(it -> it.getName().replace('/', '_').replace('\\', '_'))
+        .orElse("");
   }
 }
