@@ -1,9 +1,9 @@
 package org.dyndns.fichtner.purgeannotationrefs.mojo;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.Build;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -32,7 +32,6 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 
 import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.*;
-import static org.dyndns.fichtner.purgeannotationrefs.mojo.FileUtilities.copy;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -88,7 +87,7 @@ public class PurgeAnnoRefsMojoTest extends GradleMojoTestCase {
     File target = new File(
         build(targetDirectory, prj).getOutputDirectory(), "classes");
 
-    copy(new File("../library/target/test-classes"), target);
+    FileUtils.copyFile(new File("../library/target/test-classes"), target);
     assertAllAnnotationsArePresent(target);
 
     PurgeAnnoRefsMojo mojo = (PurgeAnnoRefsMojo) lookupConfiguredMojo(prj, "par");

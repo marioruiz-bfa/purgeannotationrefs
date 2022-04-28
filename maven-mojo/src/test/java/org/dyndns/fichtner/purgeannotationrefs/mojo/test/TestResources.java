@@ -20,8 +20,8 @@ package org.dyndns.fichtner.purgeannotationrefs.mojo.test;
  */
 
 import org.codehaus.plexus.util.DirectoryScanner;
+
 import org.codehaus.plexus.util.FileUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
@@ -33,11 +33,12 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
 /**
- * Junit4 test {@link org.junit.jupiter.api.extension.Extension} to extract and assert test resources.
+ * Junit5 test {@link org.junit.jupiter.api.extension.Extension} to extract and assert test resources.
  *
  * @since 3.1.0
  */
@@ -70,7 +71,7 @@ public class TestResources
       throws IOException {
     String expected = FileUtils.fileRead(new File(basedir, expectedPath));
     String actual = FileUtils.fileRead(new File(basedir, actualPath));
-    Assert.assertEquals(expected, actual);
+    assertEquals(expected, actual);
   }
 
   public static void assertDirectoryContents(File dir, String... expectedPaths) {
@@ -93,7 +94,7 @@ public class TestResources
     }
 
     // compare textual representation to make diff easier to understand
-    Assert.assertEquals(toString(expected), toString(actual));
+    assertEquals(toString(expected), toString(actual));
   }
 
   private static String toString(Collection<String> strings) {
