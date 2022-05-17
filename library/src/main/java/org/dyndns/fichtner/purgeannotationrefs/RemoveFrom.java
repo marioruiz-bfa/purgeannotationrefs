@@ -40,6 +40,12 @@ public enum RemoveFrom {
    */
   PARAMETERS,
   /**
+   * @see ElementType#RECORD_COMPONENT
+   *
+   * Record components propagate annotations to the generated getter and the constructor
+   */
+  RECORD_COMPONENTS,
+  /**
    * Represents every supported element
    */
   ALL

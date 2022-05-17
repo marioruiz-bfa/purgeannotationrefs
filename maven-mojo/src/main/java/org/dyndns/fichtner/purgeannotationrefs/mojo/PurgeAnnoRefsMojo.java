@@ -8,13 +8,14 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
-import org.dyndns.fichtner.purgeannotationrefs.Matcher;
+
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.RegExpMatcher;
 import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 
 import java.io.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -88,7 +89,7 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
   private AnnotationReferenceRemover getConfigured() {
     AnnotationReferenceRemover remover = new AnnotationReferenceRemover();
     for (Remove remove : removes) {
-      Matcher<String> matcher = new RegExpMatcher(
+      Predicate<String> matcher = new RegExpMatcher(
           Pattern.compile(remove.regexp));
       if (remove.removeFroms == null) {
         remover.remove(matcher);

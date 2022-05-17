@@ -1,14 +1,14 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
-import org.dyndns.fichtner.purgeannotationrefs.Matcher;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.dyndns.fichtner.purgeannotationrefs.Util.*;
-import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
  * Class for removing annotations from the class.
@@ -17,7 +17,7 @@ import static org.objectweb.asm.Opcodes.ASM5;
  */
 public class AnnotationClassVisitor extends ClassVisitor implements Filterable {
 
-  private final List<Matcher<String>> filtered = new ArrayList<>();
+  private final List<Predicate<String>> filtered = new ArrayList<>();
 
   /**
    * Creates a new instance delegating all calls to the passed visitor.
@@ -25,7 +25,7 @@ public class AnnotationClassVisitor extends ClassVisitor implements Filterable {
    * @param classVisitor delegate visitor
    */
   public AnnotationClassVisitor(ClassVisitor classVisitor) {
-    super(ASM5, classVisitor);
+    super(ASM9, classVisitor);
   }
 
   /**
@@ -33,7 +33,8 @@ public class AnnotationClassVisitor extends ClassVisitor implements Filterable {
    *
    * @param matcher the annotation to filter
    */
-  public void addFiltered(Matcher<String> matcher) {
+  @Override
+  public void addFiltered(Predicate<String> matcher) {
     this.filtered.add(matcher);
   }
 

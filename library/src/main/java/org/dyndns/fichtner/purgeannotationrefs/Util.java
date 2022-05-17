@@ -3,6 +3,8 @@ package org.dyndns.fichtner.purgeannotationrefs;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Type;
 
+import java.util.function.Predicate;
+
 /**
  * Class holding static utility methods.
  *
@@ -79,16 +81,16 @@ public final class Util {
   }
 
   /**
-   * Checks if one of the matches matches the passed String.
+   * Checks if one of the matchers matches the passed String.
    *
-   * @param matchers List of matches
+   * @param matchers List of matchers
    * @param string   the String to check
    * @return <code>true</code> if one of the matcher matches
    */
   public static boolean atLeastOneMatches(
-      final Iterable<Matcher<String>> matchers, final String string) {
-    for (final Matcher<String> matcher : matchers) {
-      if (matcher.matches(string)) {
+      final Iterable<Predicate<String>> matchers, final String string) {
+    for (final Predicate<String> matcher : matchers) {
+      if (matcher.test(string)) {
         return true;
       }
     }

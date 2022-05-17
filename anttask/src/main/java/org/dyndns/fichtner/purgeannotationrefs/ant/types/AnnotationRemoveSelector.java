@@ -1,16 +1,16 @@
 package org.dyndns.fichtner.purgeannotationrefs.ant.types;
 
-import org.dyndns.fichtner.purgeannotationrefs.Matcher;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.RegExpMatcher;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
 import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class AnnotationRemoveSelector {
 
   private RemoveFrom from;
-  private Matcher<String> matcher;
+  private Predicate<String> matcher;
 
   public AnnotationRemoveSelector() {
     super();
@@ -24,7 +24,7 @@ public class AnnotationRemoveSelector {
     this.from = removeFrom;
   }
 
-  public Matcher<String> getMatcher() {
+  public Predicate<String> getMatcher() {
     return this.matcher;
   }
 

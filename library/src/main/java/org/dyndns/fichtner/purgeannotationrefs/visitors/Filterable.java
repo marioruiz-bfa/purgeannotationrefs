@@ -1,6 +1,6 @@
 package org.dyndns.fichtner.purgeannotationrefs.visitors;
 
-import org.dyndns.fichtner.purgeannotationrefs.Matcher;
+import java.util.function.Predicate;
 
 /**
  * Implementations are able to filter.
@@ -14,6 +14,6 @@ public interface Filterable {
    *
    * @param matcher the Matcher for filtering
    */
-  void addFiltered(Matcher<String> matcher);
+  void addFiltered(Predicate<String> matcher);
 
 }

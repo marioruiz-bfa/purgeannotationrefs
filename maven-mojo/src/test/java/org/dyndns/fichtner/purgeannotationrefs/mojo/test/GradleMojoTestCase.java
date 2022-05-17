@@ -106,7 +106,7 @@ public class GradleMojoTestCase extends PlexusTestCase {
 
     artifact.setFile(getPluginArtifactFile());
     pluginDescriptor.setPluginArtifact(artifact);
-    pluginDescriptor.setArtifacts(Arrays.asList(artifact));
+    pluginDescriptor.setArtifacts(List.of(artifact));
 
     for (ComponentDescriptor<?> desc : pluginDescriptor.getComponents()) {
       getContainer().addComponentDescriptor(desc);

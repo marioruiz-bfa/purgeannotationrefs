@@ -114,7 +114,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
    *           May be <tt>null</tt>.
    */
   public JasminifierClassAdapter(final PrintWriter pw, final ClassVisitor cv) {
-    super(Opcodes.ASM5, new ClassNode(Opcodes.ASM5) {
+    super(Opcodes.ASM9, new ClassNode(Opcodes.ASM9) {
       @Override
       public void visitEnd() {
         if (this.cv != null) {
@@ -345,7 +345,7 @@ public class JasminifierClassAdapter extends ClassVisitor {
         }
         for (int j = 0; j < mn.instructions.size(); ++j) {
           AbstractInsnNode in = mn.instructions.get(j);
-          in.accept(new MethodVisitor(Opcodes.ASM5) {
+          in.accept(new MethodVisitor(Opcodes.ASM9) {
 
             @Override
             public void visitFrame(int type, int local,

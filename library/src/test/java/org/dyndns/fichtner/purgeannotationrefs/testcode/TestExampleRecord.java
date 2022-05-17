@@ -3,7 +3,7 @@ package org.dyndns.fichtner.purgeannotationrefs.testcode;
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.StringMatcher;
 import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
-import org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleClass;
+import org.dyndns.fichtner.purgeannotationrefs.testcode.cuts.ExampleRecord;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class TestExampleClass {
+public class TestExampleRecord {
 
   private final static Class<MyAnno> annoClazz = MyAnno.class;
 
@@ -28,14 +28,18 @@ public class TestExampleClass {
         + Type.getType(clazz).getDescriptor());
   }
 
+
+
   @Test
   public void checkOriginalClassHas5Annotations() throws IOException {
-    String[] dump = classToJasmin(ExampleClass.class).split("(\\r\\n|\\r|\\n)");
+
+    String[] dump = classToJasmin(ExampleRecord.class).split("(\\r\\n|\\r|\\n)");
     assertAnnoCountIs(5, dump);
     assertEquals(1, count(dump, isAnno(annoClazz), TYPES, MyAnno.class));
+    assertEquals(1, count(dump, isAnno(annoClazz), METHODS,MyAnno.class));
     assertEquals(1, count(dump, isAnno(annoClazz), FIELDS, MyAnno.class));
     assertEquals(1, count(dump, isAnno(annoClazz), CONSTRUCTORS, MyAnno.class));
-    assertEquals(1, count(dump, isAnno(annoClazz), METHODS, MyAnno.class));
+    assertEquals(1, count(dump, isAnno(annoClazz), RECORD_COMPONENTS, MyAnno.class));
     assertEquals(1, count(dump, isAnno(annoClazz), PARAMETERS, MyAnno.class));
     // assertThat(count(dump, isAnno(annoClazz), LOCAL_VARIABLES), is(0));
   }
@@ -43,8 +47,9 @@ public class TestExampleClass {
   @Test
   public void whenRemovingAllRefsTheAnnotationIsNotFoundAtAll()
       throws IOException {
+
     try (ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
-        ExampleClass.class,
+        ExampleRecord.class,
         new AnnotationReferenceRemover().remove(new StringMatcher(
             annoClazz.getName()))))) {
       assertAnnoCountIs(0, streamToJasmin(is).split("(\\r\\n|\\r|\\n)"));
@@ -59,11 +64,13 @@ public class TestExampleClass {
   @Test
   public void removeFromMethodOnly(){
     assertDoesNotThrow(() -> removeOnlyType(METHODS));
+
   }
 
   @Test
   public void removeFromConstructorOnly(){
     assertDoesNotThrow(() -> removeOnlyType(CONSTRUCTORS));
+
   }
 
   @Test
@@ -78,12 +85,13 @@ public class TestExampleClass {
 
   private void removeOnlyType(RemoveFrom removeFrom) throws IOException {
     try (ByteArrayInputStream is = new ByteArrayInputStream(removeAnno(
-        ExampleClass.class,
+        ExampleRecord.class,
         new AnnotationReferenceRemover().removeFrom(removeFrom,
             new StringMatcher(annoClazz.getName()))))) {
       String[] dump = streamToJasmin(is).split("(\\r\\n|\\r|\\n)");
       assertCount(removeFrom, dump, TYPES);
       assertCount(removeFrom, dump, FIELDS);
+      assertCount(removeFrom, dump, RECORD_COMPONENTS);
       assertCount(removeFrom, dump, CONSTRUCTORS);
       assertCount(removeFrom, dump, METHODS);
       assertCount(removeFrom, dump, PARAMETERS);
@@ -99,6 +107,7 @@ public class TestExampleClass {
                            RemoveFrom elementToCount) {
     assertEquals(removeFrom == elementToCount ? 0 : 1, count(dump, isAnno(annoClazz), elementToCount, MyAnno.class));
   }
+
 
 
 

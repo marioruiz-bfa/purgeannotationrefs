@@ -1,5 +1,6 @@
 package org.dyndns.fichtner.purgeannotationrefs;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -9,18 +10,10 @@ import java.util.regex.Pattern;
  * @author Peter Fichtner
  */
 @FunctionalInterface
-public interface Matcher<T> {
+public interface Matcher<T> extends Predicate<T> {
 
   /**
-   * Returns <code>true</code> if the passed T matches.
-   *
-   * @param t the value to check
-   * @return <code>true</code> if the passed T matches
-   */
-  boolean matches(T t);
-
-  /**
-   * A RegExp based matcher (matches if the two Strings are equals).
+   * A Comparison based matcher (matches if the two Strings are equals).
    *
    * @author Peter Fichtner
    */
@@ -38,7 +31,7 @@ public interface Matcher<T> {
       this.pattern = name;
     }
 
-    public boolean matches(final String string) {
+    public boolean test(final String string) {
       return this.pattern.equals(string);
     }
 
@@ -62,7 +55,7 @@ public interface Matcher<T> {
       this.pattern = pattern;
     }
 
-    public boolean matches(final String string) {
+    public boolean test(final String string) {
       return this.pattern.matcher(string).matches();
     }
 

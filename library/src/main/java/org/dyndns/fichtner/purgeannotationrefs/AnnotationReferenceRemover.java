@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.*;
 
@@ -47,7 +48,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
    * @param matcher the annotation that should be removed
    * @return this instance
    */
-  public AnnotationReferenceRemover remove(Matcher<String> matcher) {
+  public AnnotationReferenceRemover remove(Predicate<String> matcher) {
     for (RemoveFrom removeFrom : RemoveFrom.values()) {
       removeFrom(removeFrom, matcher);
     }
@@ -61,8 +62,7 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
    * @param matcher    the annotation that should be removed
    * @return this instance
    */
-  public AnnotationReferenceRemover removeFrom(RemoveFrom removeFrom,
-                                               Matcher<String> matcher) {
+  public AnnotationReferenceRemover removeFrom(RemoveFrom removeFrom, Predicate<String> matcher) {
     this.config.addFiltered(removeFrom, matcher);
     return this;
   }
@@ -83,46 +83,42 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
    * @param outputStream the stream to write to
    * @throws IOException on write errors
    */
-  public void optimize(InputStream inputStream, OutputStream outputStream)
-      throws IOException {
+  public void optimize(InputStream inputStream, OutputStream outputStream) throws IOException {
     ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-    new ClassReader(inputStream).accept(createVisitors(classWriter),
-        toInt(this.rewriteMode));
+    new ClassReader(inputStream).accept(createVisitors(classWriter), toInt(this.rewriteMode));
     outputStream.write(classWriter.toByteArray());
   }
 
   private AnnotationParameterVisitor createVisitors(ClassWriter classWriter) {
-    return createParameterVisitor(createFieldVisitor(createMethodVisitor(createConstructorVisitor(createClassVisitor(classWriter)))));
+    return createParameterVisitor(createFieldVisitor(createRecordComponentVisitor(createMethodVisitor(createConstructorVisitor(createClassVisitor(classWriter))))));
   }
 
-  private AnnotationParameterVisitor createParameterVisitor(
-      ClassVisitor classVisitor) {
-    return configure(new AnnotationParameterVisitor(classVisitor),
-        PARAMETERS);
+  private AnnotationParameterVisitor createParameterVisitor(ClassVisitor classVisitor) {
+    return configure(new AnnotationParameterVisitor(classVisitor), PARAMETERS);
   }
 
   private AnnotationFieldVisitor createFieldVisitor(ClassVisitor classVisitor) {
     return configure(new AnnotationFieldVisitor(classVisitor), FIELDS);
   }
 
-  private AnnotationMethodVisitor createMethodVisitor(
-      ClassVisitor classVisitor) {
+  private AnnotationMethodVisitor createMethodVisitor(ClassVisitor classVisitor) {
     return configure(new AnnotationMethodVisitor(classVisitor), METHODS);
   }
 
-  private AnnotationConstructorVisitor createConstructorVisitor(
-      ClassVisitor classVisitor) {
-    return configure(new AnnotationConstructorVisitor(classVisitor),
-        CONSTRUCTORS);
+  private AnnotationConstructorVisitor createConstructorVisitor(ClassVisitor classVisitor) {
+    return configure(new AnnotationConstructorVisitor(classVisitor), CONSTRUCTORS);
   }
 
   private AnnotationClassVisitor createClassVisitor(ClassVisitor classVisitor) {
     return configure(new AnnotationClassVisitor(classVisitor), TYPES);
   }
 
-  private <T extends Filterable> T configure(T filteringVisitor,
-                                             RemoveFrom removeFrom) {
-    for (Matcher<String> matcher : this.config.getFiltered(removeFrom)) {
+  private AnnotationRecordComponentVisitor createRecordComponentVisitor(ClassVisitor classVisitor) {
+    return configure(new AnnotationRecordComponentVisitor(classVisitor), RECORD_COMPONENTS);
+  }
+
+  private <T extends Filterable> T configure(T filteringVisitor, RemoveFrom removeFrom) {
+    for (Predicate<String> matcher : this.config.getFiltered(removeFrom)) {
       filteringVisitor.addFiltered(matcher);
     }
     return filteringVisitor;
@@ -170,17 +166,16 @@ public class AnnotationReferenceRemover implements ClassOptimizer {
 
   private static class Config {
 
-    private final EnumMap<RemoveFrom, List<Matcher<String>>> map = new EnumMap<>(
-        RemoveFrom.class);
+    private final EnumMap<RemoveFrom, List<Predicate<String>>> map = new EnumMap<>(RemoveFrom.class);
 
-    public void addFiltered(RemoveFrom removeFrom, Matcher<String> matcher) {
+    public void addFiltered(RemoveFrom removeFrom, Predicate<String> matcher) {
       if (removeFrom != ALL) {
-        List<Matcher<String>> data = this.map.computeIfAbsent(removeFrom, k -> new ArrayList<>());
+        List<Predicate<String>> data = this.map.computeIfAbsent(removeFrom, k -> new ArrayList<>());
         data.add(matcher);
       }
     }
 
-    public List<Matcher<String>> getFiltered(RemoveFrom removeFrom) {
+    public List<Predicate<String>> getFiltered(RemoveFrom removeFrom) {
       return this.map.getOrDefault(removeFrom, Collections.emptyList());
     }
 
