@@ -41,7 +41,7 @@ public enum RemoveFrom {
   PARAMETERS,
   /**
    * @see ElementType#RECORD_COMPONENT
-   *
+   * <p>
    * Record components propagate annotations to the generated getter and the constructor
    */
   RECORD_COMPONENTS,

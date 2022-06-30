@@ -3,6 +3,7 @@ package org.dyndns.fichtner.purgeannotationrefs.testcode.cuts;
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
 import org.dyndns.fichtner.purgeannotationrefs.Matcher;
 import org.dyndns.fichtner.purgeannotationrefs.testcode.MyAnno;
+import org.dyndns.fichtner.purgeannotationrefs.testcode.MyRecordAnno;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import static org.dyndns.fichtner.purgeannotationrefs.RemoveFrom.*;
 
 @MyAnno(TYPES)
-public record ExampleRecord(@MyAnno(RECORD_COMPONENTS) String stringComponent, int intComponent) {
+public record ExampleRecord(@MyRecordAnno(RECORD_COMPONENTS) String stringComponent, int intComponent) {
 
 
   private static String field = "ok1";
@@ -30,6 +31,19 @@ public record ExampleRecord(@MyAnno(RECORD_COMPONENTS) String stringComponent, i
     this("", value);
   }
 
+  public static void main(String[] args) throws IOException, SecurityException, NoSuchMethodException, NoSuchFieldException {
+    new ExampleRecord("E", 7).frobnicate(9);
+
+    InputStream resource = ExampleRecord.class.getResourceAsStream(ExampleRecord.class.getName().replace('.', File.separatorChar) + ".class");
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+    new AnnotationReferenceRemover().remove(new Matcher.StringMatcher(MyAnno.class.getName())).optimize(resource, outputStream);
+
+    outputStream.close();
+    System.out.println(Arrays.toString(outputStream.toByteArray()));
+  }
+
   @MyAnno(METHODS)
   public String frobnicate(@MyAnno(PARAMETERS) int extra) throws SecurityException, NoSuchMethodException, NoSuchFieldException {
     System.out.println("record component " + Arrays.toString(ExampleRecord.class.getRecordComponents()[0].getAnnotations()));
@@ -44,19 +58,5 @@ public record ExampleRecord(@MyAnno(RECORD_COMPONENTS) String stringComponent, i
 
   private void methodWithoutAnnotation() {
     System.out.println("anotherMethod");
-  }
-
-
-  public static void main(String[] args) throws IOException, SecurityException, NoSuchMethodException, NoSuchFieldException {
-    new ExampleRecord("E", 7).frobnicate(9);
-
-    InputStream resource = ExampleRecord.class.getResourceAsStream(ExampleRecord.class.getName().replace('.', File.separatorChar) + ".class");
-
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-    new AnnotationReferenceRemover().remove(new Matcher.StringMatcher(MyAnno.class.getName())).optimize(resource, outputStream);
-
-    outputStream.close();
-    System.out.println(Arrays.toString(outputStream.toByteArray()));
   }
 }

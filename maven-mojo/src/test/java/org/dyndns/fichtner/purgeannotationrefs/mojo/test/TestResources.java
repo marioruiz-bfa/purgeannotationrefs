@@ -20,7 +20,6 @@ package org.dyndns.fichtner.purgeannotationrefs.mojo.test;
  */
 
 import org.codehaus.plexus.util.DirectoryScanner;
-
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

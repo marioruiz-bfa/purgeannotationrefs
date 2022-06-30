@@ -42,7 +42,10 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -275,7 +278,6 @@ public class GradleMojoTestCase extends PlexusTestCase {
 
     return lookupMojo(groupId, artifactId, version, goal, null);
   }
-
 
 
   /**

@@ -57,12 +57,12 @@ public class TestExampleClass {
   }
 
   @Test
-  public void removeFromMethodOnly(){
+  public void removeFromMethodOnly() {
     assertDoesNotThrow(() -> removeOnlyType(METHODS));
   }
 
   @Test
-  public void removeFromConstructorOnly(){
+  public void removeFromConstructorOnly() {
     assertDoesNotThrow(() -> removeOnlyType(CONSTRUCTORS));
   }
 
@@ -99,7 +99,6 @@ public class TestExampleClass {
                            RemoveFrom elementToCount) {
     assertEquals(removeFrom == elementToCount ? 0 : 1, count(dump, isAnno(annoClazz), elementToCount, MyAnno.class));
   }
-
 
 
   private void assertAnnoCountIs(int count, String[] s) {

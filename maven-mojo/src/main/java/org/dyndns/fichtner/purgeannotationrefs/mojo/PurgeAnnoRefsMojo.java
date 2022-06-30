@@ -1,14 +1,12 @@
 package org.dyndns.fichtner.purgeannotationrefs.mojo;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.dyndns.fichtner.purgeannotationrefs.AnnotationReferenceRemover;
-
 import org.dyndns.fichtner.purgeannotationrefs.Matcher.RegExpMatcher;
 import org.dyndns.fichtner.purgeannotationrefs.RemoveFrom;
 
@@ -58,7 +56,8 @@ public class PurgeAnnoRefsMojo extends AbstractMojo {
     }
     return files;
   }
-  public void execute() throws MojoExecutionException, MojoFailureException {
+
+  public void execute() throws MojoFailureException {
     AnnotationReferenceRemover remover = getConfigured();
     for (File file : collectFiles(new File(project.getBuild().getOutputDirectory()))) {
       enhanceClass(remover, file);

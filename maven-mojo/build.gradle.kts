@@ -64,7 +64,7 @@ dependencies {
   implementation("org.apache.maven:maven-core:3.8.5")
   implementation("org.apache.maven:maven-plugin-api:3.8.5")
   implementation("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.4")
-  testImplementation("org.codehaus.plexus:plexus-utils:3.4.1")
+  testImplementation("org.codehaus.plexus:plexus-utils:3.4.2")
   testImplementation("org.codehaus.plexus:plexus-container-default:2.1.1")
   testImplementation("org.apache.maven.plugin-testing:maven-plugin-testing-harness:3.3.0")
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
